@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkTrace — Deferred Deep Linking Guide</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #181c27;
+      --surface2: #1e2335;
+      --border: #2a2f45;
+      --accent: #6366f1;
+      --accent-dim: #3730a3;
+      --green: #22c55e;
+      --green-dim: #14532d;
+      --red: #ef4444;
+      --red-dim: #450a0a;
+      --yellow: #f59e0b;
+      --yellow-dim: #451a03;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --code-bg: #0d1117;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      padding: 40px 20px 80px;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 48px 0 56px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .logo-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: var(--text-dim);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ── Concept box ── */
+    .concept-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 56px;
+    }
+
+    .concept-box h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .concept-box p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .concept-box p:last-child { margin-bottom: 0; }
+
+    .highlight-inline {
+      display: inline;
+      background: #1e2335;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #cba6f7;
+    }
+
+    /* ── Section titles ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── Flow ── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 64px;
+    }
+
+    .step-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      position: relative;
+    }
+
+    .step:hover {
+      border-color: #3a4060;
+      background: var(--surface2);
+      transition: all 0.15s ease;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .step-number {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #a5b4fc;
+      font-family: var(--mono);
+    }
+
+    .step-title-group { flex: 1; }
+
+    .step-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .step-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .step-tag {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid;
+    }
+
+    .tag-server { color: #93c5fd; background: #1e3a5f; border-color: #2563eb; }
+    .tag-mobile { color: #86efac; background: #14532d; border-color: #16a34a; }
+    .tag-user   { color: #fcd34d; background: #451a03; border-color: #d97706; }
+    .tag-auto   { color: #c4b5fd; background: #2e1065; border-color: #7c3aed; }
+
+    /* ── Code blocks ── */
+    .code-panel {
+      background: var(--code-bg);
+      border: 1px solid #1e2535;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #161b27;
+      border-bottom: 1px solid #1e2535;
+    }
+
+    .code-lang {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .method-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1a3a1a;
+      color: #4ade80;
+      border: 1px solid #166534;
+    }
+
+    pre {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #cdd6f4;
+    }
+
+    .k  { color: #cba6f7; }
+    .s  { color: #a6e3a1; }
+    .kw { color: #89b4fa; }
+    .c  { color: #585b70; }
+    .n  { color: #fab387; }
+    .u  { color: #f38ba8; }
+    .t  { color: #89dceb; }
+    .fn { color: #f9e2af; }
+
+    /* ── Two-column layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    .col-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── Arrow connector ── */
+    .arrow-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0;
+      gap: 2px;
+    }
+
+    .arrow-line {
+      width: 2px;
+      height: 20px;
+      background: linear-gradient(to bottom, var(--border), var(--accent));
+    }
+
+    .arrow-head {
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--accent);
+    }
+
+    .arrow-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    /* ── Auto steps ── */
+    .auto-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .auto-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .auto-num {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      margin-top: 2px;
+    }
+
+    .auto-text { font-size: 14px; color: var(--text-dim); }
+    .auto-text strong { color: var(--text); font-weight: 500; }
+
+    /* ── Platform tabs ── */
+    .platform-section {
+      margin-bottom: 64px;
+    }
+
+    .platform-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0;
+    }
+
+    .platform-tab {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .platform-tab:hover { color: var(--text-dim); }
+
+    .platform-tab.active {
+      color: #a5b4fc;
+      border-bottom-color: var(--accent);
+    }
+
+    .platform-content { display: none; }
+    .platform-content.active { display: block; }
+
+    /* ── Sub-tabs (Jetpack vs Intent) ── */
+    .sub-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .sub-tab {
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.12s ease;
+      user-select: none;
+    }
+
+    .sub-tab:hover { color: var(--text-dim); border-color: #3a4060; }
+
+    .sub-tab.active {
+      color: #a5b4fc;
+      background: var(--accent-dim);
+      border-color: var(--accent);
+    }
+
+    .sub-content { display: none; }
+    .sub-content.active { display: block; }
+
+    /* ── Implementation card ── */
+    .impl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .impl-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .impl-card .impl-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    /* ── Response field ── */
+    .response-field {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-family: var(--mono);
+      align-items: baseline;
+    }
+
+    .field-key   { color: #89b4fa; min-width: 160px; flex-shrink: 0; }
+    .field-val   { color: #a6e3a1; }
+
+    /* ── Use-cases ── */
+    .use-cases {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .use-case-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .use-case-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .use-case-list li {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    /* ── Payload examples table ── */
+    .payload-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .payload-table th {
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 10px 16px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    .payload-table td {
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--text-dim);
+    }
+
+    .payload-table tr:nth-child(even) td { background: #13161f; }
+    .payload-table tr:first-child td { background: var(--surface); }
+
+    .payload-table td:first-child {
+      font-family: var(--mono);
+      color: #a6e3a1;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .payload-table td:nth-child(2) {
+      color: var(--text-dim);
+    }
+
+    .payload-table td:nth-child(3) {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* ── Warning / note boxes ── */
+    .note-box {
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-top: 16px;
+    }
+
+    .note-warn {
+      background: #1a1000;
+      border: 1px solid #713f12;
+    }
+
+    .note-warn .note-title { color: #fbbf24; font-weight: 700; font-size: 11px; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .note-warn .note-body  { color: #d97706; }
+    .note-warn .note-body strong { color: #fbbf24; }
+
+    .note-info {
+      background: #0f1a2e;
+      border: 1px solid #1d4ed8;
+    }
+
+    .note-info .note-title { color: #93c5fd; font-weight: 700; font-size: 11px; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .note-info .note-body  { color: #7da9d0; }
+    .note-info .note-body strong { color: #93c5fd; }
+
+    .note-tip {
+      background: #0f2318;
+      border: 1px solid #166534;
+    }
+
+    .note-tip .note-title { color: #4ade80; font-weight: 700; font-size: 11px; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .note-tip .note-body  { color: #86efac; opacity: 0.85; }
+    .note-tip .note-body strong { color: #4ade80; opacity: 1; }
+
+    /* ── Rules ── */
+    .rules-section {
+      margin-bottom: 64px;
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .rules-grid { grid-template-columns: 1fr; }
+    }
+
+    .rule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .rule-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    .rule-text {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+
+    .rule-text strong {
+      color: var(--text);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--code-bg);
+      border: 1px solid #1e2535;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #cba6f7;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Spacer ── */
+    .section-spacer { margin-bottom: 64px; }
+
+    .window-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: #2c1a00;
+      border: 1px solid var(--yellow);
+      font-size: 12px;
+      color: var(--yellow);
+      font-weight: 600;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-badge">
+      <div class="logo-dot"></div>
+      LinkTrace Developer Docs
+    </div>
+    <h1>Deferred Deep Linking<br>with LinkTrace</h1>
+    <p class="subtitle">Route newly installed users to any screen inside your app — even before the app exists on their device.</p>
+  </header>
+
+  <!-- Concept -->
+  <div class="concept-box section-spacer">
+    <h2>What is Deferred Deep Linking?</h2>
+    <p>
+      A standard deep link (e.g. <span class="highlight-inline">myapp://promo/SAVE20</span>) works only if the app is already installed.
+      Tap the same link on a device without the app and it does nothing useful.
+    </p>
+    <p>
+      <strong style="color:var(--text)">Deferred</strong> deep linking bridges this gap. A user taps a link, gets sent to the App Store or Play Store,
+      installs your app, opens it for the first time — and <em>still</em> lands on the exact screen the link was pointing to.
+      The "deferred" part means the navigation intent survives the install gap.
+    </p>
+    <p>
+      LinkTrace implements this through <strong style="color:var(--text)">device fingerprint matching</strong> combined with the
+      <span class="highlight-inline">customPayload</span> field. You encode a <span class="highlight-inline">screenName</span>
+      (and any extra context) into the link at creation time. On first launch after sign-up, your app calls the Attribution API —
+      if the install is matched, the original payload is returned and you navigate accordingly.
+    </p>
+  </div>
+
+  <!-- Flow -->
+  <div class="section-spacer">
+    <div class="section-label">End-to-End Flow</div>
+
+    <div class="flow">
+
+      <!-- STEP 1 -->
+      <div class="step-wrapper">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">01</div>
+            <div class="step-title-group">
+              <div class="step-title">Create the Link — Encode the Target Screen</div>
+              <div class="step-subtitle">Pass <code>screenName</code> (and any extra context) inside <code>customPayload</code></div>
+            </div>
+            <div class="step-tag tag-server">Your Server / Dashboard</div>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <div class="col-label">API Request</div>
+              <div class="code-panel">
+                <div class="code-header">
+                  <span class="code-lang">HTTP</span>
+                  <span class="method-badge">POST</span>
+                </div>
+                <pre><span class="k">POST</span> <span class="u">https://api.linktrace.in/api/v1/referral-links</span>
+<span class="kw">x-api-key</span>: <span class="s">YOUR_API_KEY</span>
+
+{
+  <span class="kw">"referrerIdentifier"</span>: <span class="s">"user_9821"</span>,
+  <span class="kw">"campaign"</span>:           <span class="s">"summer_referral"</span>,
+  <span class="kw">"customPayload"</span>: {
+    <span class="kw">"screenName"</span>: <span class="s">"promo_screen"</span>,  <span class="c">// target screen</span>
+    <span class="kw">"promoCode"</span>:  <span class="s">"SAVE20"</span>,       <span class="c">// extra context</span>
+    <span class="kw">"variant"</span>:    <span class="s">"hero_cta"</span>      <span class="c">// A/B variant</span>
+  }
+}</pre>
+              </div>
+            </div>
+            <div>
+              <div class="col-label">Response</div>
+              <div class="code-panel">
+                <div class="code-header">
+                  <span class="code-lang">JSON</span>
+                  <span style="font-size:11px;color:#4ade80;font-weight:700;">201 Created</span>
+                </div>
+                <pre>{
+  <span class="kw">"success"</span>: <span class="n">true</span>,
+  <span class="kw">"data"</span>: {
+    <span class="kw">"shortCode"</span>:    <span class="s">"56ff9241"</span>,
+    <span class="kw">"referralLink"</span>:
+      <span class="s">"https://app.linktrace.in/r/56ff9241"</span>,
+    <span class="kw">"referrerIdentifier"</span>: <span class="s">"user_9821"</span>
+  }
+}</pre>
+              </div>
+
+              <div class="note-tip" style="margin-top:12px;">
+                <div class="note-title">TIP — customPayload limit</div>
+                <div class="note-body">Up to <strong>3 key-value string pairs</strong>. Use them for screen name, promo code, or onboarding variant — they are returned verbatim on a successful attribution.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- screenName examples -->
+          <div style="margin-top:24px;">
+            <div class="col-label">Common screenName Values</div>
+            <table class="payload-table">
+              <thead>
+                <tr>
+                  <th>screenName</th>
+                  <th>Navigates to</th>
+                  <th>Typical use case</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>"promo_screen"</td>
+                  <td>A promotional / offer screen</td>
+                  <td>Referral reward, discount code landing</td>
+                </tr>
+                <tr>
+                  <td>"onboarding_variant_b"</td>
+                  <td>Alternate onboarding flow</td>
+                  <td>A/B testing a different welcome sequence</td>
+                </tr>
+                <tr>
+                  <td>"product_detail"</td>
+                  <td>Specific product / item page</td>
+                  <td>Social share of a product listing</td>
+                </tr>
+                <tr>
+                  <td>"challenge_invite"</td>
+                  <td>In-app challenge or event</td>
+                  <td>Friend invited to join a specific game/event</td>
+                </tr>
+                <tr>
+                  <td>"profile"</td>
+                  <td>Another user's profile</td>
+                  <td>Follow / connect flows from social share</td>
+                </tr>
+                <tr>
+                  <td>"referral_success"</td>
+                  <td>Referral reward confirmation screen</td>
+                  <td>Close the loop — show what the referrer sent</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="arrow-connector">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">share the short link</div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-wrapper">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">02</div>
+            <div class="step-title-group">
+              <div class="step-title">User Taps the Link</div>
+              <div class="step-subtitle">LinkTrace records the click, fingerprints the device, and redirects to the store</div>
+            </div>
+            <div class="step-tag tag-auto">Auto / LinkTrace</div>
+          </div>
+
+          <div class="auto-steps">
+            <div class="auto-step">
+              <div class="auto-num">①</div>
+              <div class="auto-text">LinkTrace logs the click and records the <strong>device fingerprint</strong></div>
+            </div>
+            <div class="auto-step">
+              <div class="auto-num">②</div>
+              <div class="auto-text">The <strong>customPayload</strong> is stored server-side, tied to the fingerprint</div>
+            </div>
+            <div class="auto-step">
+              <div class="auto-num">③</div>
+              <div class="auto-text">User is redirected → <strong>App Store</strong> (iOS) or <strong>Play Store</strong> (Android)</div>
+            </div>
+          </div>
+
+          <div class="window-badge">
+            ⏰ &nbsp;Attribution window: user must install within <strong>&nbsp;24 hours</strong> of clicking
+          </div>
+        </div>
+
+        <div class="arrow-connector">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">user installs &amp; creates an account</div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-wrapper">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">03</div>
+            <div class="step-title-group">
+              <div class="step-title">Call the Attribution API — After Sign-Up</div>
+              <div class="step-subtitle">Call this once, right after the user completes registration</div>
+            </div>
+            <div class="step-tag tag-mobile">Your Mobile App</div>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <div class="col-label">API Request</div>
+              <div class="code-panel">
+                <div class="code-header">
+                  <span class="code-lang">HTTP</span>
+                  <span class="method-badge">POST</span>
+                </div>
+                <pre><span class="k">POST</span> <span class="u">https://api.linktrace.in/api/v1/attributions</span>
+<span class="kw">x-api-key</span>: <span class="s">YOUR_API_KEY</span>
+
+{
+  <span class="kw">"userId"</span>: <span class="s">"your_internal_user_id"</span>
+}</pre>
+              </div>
+            </div>
+            <div>
+              <div class="col-label">Success Response</div>
+              <div class="code-panel">
+                <div class="code-header">
+                  <span class="code-lang">JSON</span>
+                  <span style="font-size:11px;color:#4ade80;font-weight:700;">200 OK</span>
+                </div>
+                <pre>{
+  <span class="kw">"success"</span>: <span class="n">true</span>,
+  <span class="kw">"data"</span>: {
+    <span class="kw">"attributed"</span>:        <span class="n">true</span>,
+    <span class="kw">"referrerIdentifier"</span>: <span class="s">"user_9821"</span>,
+    <span class="kw">"campaign"</span>:          <span class="s">"summer_referral"</span>,
+    <span class="kw">"customPayload"</span>: {
+      <span class="kw">"screenName"</span>: <span class="s">"promo_screen"</span>,
+      <span class="kw">"promoCode"</span>:  <span class="s">"SAVE20"</span>,
+      <span class="kw">"variant"</span>:    <span class="s">"hero_cta"</span>
+    }
+  }
+}</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="note-warn" style="margin-top:16px;">
+            <div class="note-title">⚠ IMPORTANT — Call once per user</div>
+            <div class="note-body">Trigger this call <strong>once</strong> right after sign-up completes — not on every app open. Repeated calls for the same userId may produce unexpected results. Gate it behind a flag (e.g. <code>hasCheckedAttribution</code>) persisted in local storage.</div>
+          </div>
+        </div>
+
+        <div class="arrow-connector">
+          <div class="arrow-line"></div>
+          <div class="arrow-head"></div>
+          <div class="arrow-label">read screenName from response and navigate</div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-wrapper">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">04</div>
+            <div class="step-title-group">
+              <div class="step-title">Navigate to the Target Screen</div>
+              <div class="step-subtitle">Read <code>customPayload.screenName</code> from the response and route the user</div>
+            </div>
+            <div class="step-tag tag-mobile">Your Mobile App</div>
+          </div>
+
+          <div class="auto-steps">
+            <div class="auto-step">
+              <div class="auto-num">①</div>
+              <div class="auto-text">Check <strong>attributed: true</strong> in the response</div>
+            </div>
+            <div class="auto-step">
+              <div class="auto-num">②</div>
+              <div class="auto-text">Read <strong>customPayload.screenName</strong> to determine destination</div>
+            </div>
+            <div class="auto-step">
+              <div class="auto-num">③</div>
+              <div class="auto-text">Pass any additional payload fields (e.g. <strong>promoCode</strong>) as parameters to the screen</div>
+            </div>
+            <div class="auto-step">
+              <div class="auto-num">④</div>
+              <div class="auto-text">If <strong>attributed: false</strong> — continue with the default post-signup flow</div>
+            </div>
+          </div>
+
+          <div class="use-cases">
+            <div class="use-case-label">What you can do with the payload on this screen</div>
+            <ul class="use-case-list">
+              <li>🎁 Auto-apply a promo code from customPayload</li>
+              <li>👤 Pre-credit the referrer (referrerIdentifier)</li>
+              <li>🎯 Show a personalised onboarding variant</li>
+              <li>📊 Tag the user's session with campaign &amp; source</li>
+              <li>🏆 Trigger a referral reward flow</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .flow -->
+  </div>
+
+  <!-- Platform Implementations -->
+  <div class="platform-section">
+    <div class="section-label">Platform Implementation</div>
+
+    <div class="platform-tabs">
+      <div class="platform-tab active" onclick="switchPlatform('ios')">iOS — SwiftUI</div>
+      <div class="platform-tab" onclick="switchPlatform('android')">Android — Kotlin</div>
+    </div>
+
+    <!-- iOS -->
+    <div id="platform-ios" class="platform-content active">
+
+      <div class="impl-card">
+        <h3>1 — Attribution Model</h3>
+        <p class="impl-desc">Define a Swift struct that maps the attribution response. This lives in your network/models layer.</p>
+        <div class="code-panel">
+          <div class="code-header">
+            <span class="code-lang">Swift</span>
+            <span style="font-size:11px;color:var(--text-muted);">AttributionResponse.swift</span>
+          </div>
+          <pre><span class="k">struct</span> <span class="t">AttributionResponse</span>: <span class="t">Codable</span> {
+    <span class="k">let</span> success:  <span class="t">Bool</span>
+    <span class="k">let</span> data:     <span class="t">AttributionData</span>
+}
+
+<span class="k">struct</span> <span class="t">AttributionData</span>: <span class="t">Codable</span> {
+    <span class="k">let</span> attributed:          <span class="t">Bool</span>
+    <span class="k">let</span> referrerIdentifier:  <span class="t">String</span>?
+    <span class="k">let</span> campaign:            <span class="t">String</span>?
+    <span class="k">let</span> source:              <span class="t">String</span>?
+    <span class="k">let</span> customPayload:       [<span class="t">String</span>: <span class="t">String</span>]?
+}
+</pre>
+        </div>
+      </div>
+
+      <div class="impl-card">
+        <h3>2 — Attribution Service</h3>
+        <p class="impl-desc">A lightweight async function that calls the Attribution API. Call this from your ViewModel or AppDelegate after sign-up.</p>
+        <div class="code-panel">
+          <div class="code-header">
+            <span class="code-lang">Swift</span>
+            <span style="font-size:11px;color:var(--text-muted);">AttributionService.swift</span>
+          </div>
+          <pre><span class="k">final class</span> <span class="t">AttributionService</span> {
+
+    <span class="k">private let</span> apiKey  = <span class="s">"YOUR_API_KEY"</span>
+    <span class="k">private let</span> baseURL = <span class="s">"https://api.linktrace.in"</span>
+
+    <span class="k">func</span> <span class="fn">fetchAttribution</span>(userId: <span class="t">String</span>) <span class="k">async throws</span> -> <span class="t">AttributionData</span> {
+        <span class="k">guard let</span> url = <span class="t">URL</span>(string: <span class="s">"\(baseURL)/api/v1/attributions"</span>) <span class="k">else</span> {
+            <span class="k">throw</span> <span class="t">URLError</span>(.badURL)
+        }
+
+        <span class="k">var</span> request = <span class="t">URLRequest</span>(url: url)
+        request.httpMethod          = <span class="s">"POST"</span>
+        request.setValue(<span class="s">"application/json"</span>, forHTTPHeaderField: <span class="s">"Content-Type"</span>)
+        request.setValue(apiKey,           forHTTPHeaderField: <span class="s">"x-api-key"</span>)
+        request.httpBody = <span class="k">try</span> <span class="t">JSONEncoder</span>().<span class="fn">encode</span>([<span class="s">"userId"</span>: userId])
+
+        <span class="k">let</span> (data, _) = <span class="k">try await</span> <span class="t">URLSession</span>.shared.<span class="fn">data</span>(for: request)
+        <span class="k">let</span> response  = <span class="k">try</span> <span class="t">JSONDecoder</span>().<span class="fn">decode</span>(<span class="t">AttributionResponse</span>.self, from: data)
+        <span class="k">return</span> response.data
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="impl-card">
+        <h3>3 — Navigation via NavigationStack</h3>
+        <p class="impl-desc">Use a typed route enum with <code>NavigationStack</code> and a <code>navigationPath</code>. Call <code>checkDeferredDeepLink</code> from the <code>.onAppear</code> of your post-signup root view, or directly from your sign-up completion handler.</p>
+        <div class="code-panel">
+          <div class="code-header">
+            <span class="code-lang">Swift</span>
+            <span style="font-size:11px;color:var(--text-muted);">AppRouter.swift</span>
+          </div>
+          <pre><span class="c">// 1. Define your app's navigable routes</span>
+<span class="k">enum</span> <span class="t">AppRoute</span>: <span class="t">Hashable</span> {
+    <span class="k">case</span> promoScreen(promoCode: <span class="t">String</span>?)
+    <span class="k">case</span> onboardingVariantB
+    <span class="k">case</span> productDetail(id: <span class="t">String</span>)
+    <span class="k">case</span> challengeInvite
+    <span class="k">case</span> referralSuccess(referrerName: <span class="t">String</span>?)
+    <span class="c">// add more routes as needed</span>
+}
+
+<span class="c">// 2. Root view owning the NavigationStack</span>
+<span class="k">struct</span> <span class="t">RootView</span>: <span class="t">View</span> {
+    <span class="k">@StateObject private var</span> router = <span class="t">AppRouter</span>()
+
+    <span class="k">var</span> body: <span class="k">some</span> <span class="t">View</span> {
+        <span class="t">NavigationStack</span>(path: $router.path) {
+            <span class="t">HomeView</span>()
+                .<span class="fn">navigationDestination</span>(for: <span class="t">AppRoute</span>.self) { route <span class="k">in</span>
+                    <span class="k">switch</span> route {
+                    <span class="k">case</span> .promoScreen(<span class="k">let</span> code):
+                        <span class="t">PromoView</span>(promoCode: code)
+                    <span class="k">case</span> .onboardingVariantB:
+                        <span class="t">OnboardingVariantBView</span>()
+                    <span class="k">case</span> .productDetail(<span class="k">let</span> id):
+                        <span class="t">ProductDetailView</span>(productId: id)
+                    <span class="k">case</span> .challengeInvite:
+                        <span class="t">ChallengeInviteView</span>()
+                    <span class="k">case</span> .referralSuccess(<span class="k">let</span> name):
+                        <span class="t">ReferralSuccessView</span>(referrerName: name)
+                    }
+                }
+        }
+        .<span class="fn">environmentObject</span>(router)
+    }
+}
+
+<span class="c">// 3. Router class — holds path and resolution logic</span>
+<span class="k">@MainActor
+final class</span> <span class="t">AppRouter</span>: <span class="t">ObservableObject</span> {
+
+    <span class="k">@Published var</span> path = <span class="t">NavigationPath</span>()
+
+    <span class="k">private let</span> service  = <span class="t">AttributionService</span>()
+    <span class="k">private let</span> defaults = <span class="t">UserDefaults</span>.standard
+
+    <span class="k">func</span> <span class="fn">checkDeferredDeepLink</span>(userId: <span class="t">String</span>) {
+        <span class="c">// Guard: only run once per user</span>
+        <span class="k">guard</span> !defaults.<span class="fn">bool</span>(forKey: <span class="s">"lt_attribution_checked"</span>) <span class="k">else</span> { <span class="k">return</span> }
+
+        <span class="t">Task</span> {
+            <span class="k">do</span> {
+                <span class="k">let</span> data = <span class="k">try await</span> service.<span class="fn">fetchAttribution</span>(userId: userId)
+                defaults.<span class="fn">set</span>(<span class="n">true</span>, forKey: <span class="s">"lt_attribution_checked"</span>)
+
+                <span class="k">guard</span> data.attributed,
+                      <span class="k">let</span> payload    = data.customPayload,
+                      <span class="k">let</span> screenName = payload[<span class="s">"screenName"</span>] <span class="k">else</span> { <span class="k">return</span> }
+
+                <span class="fn">navigate</span>(to: screenName, payload: payload)
+            } <span class="k">catch</span> {
+                <span class="c">// Attribution failure is non-fatal; continue default flow</span>
+            }
+        }
+    }
+
+    <span class="k">private func</span> <span class="fn">navigate</span>(to screenName: <span class="t">String</span>, payload: [<span class="t">String</span>: <span class="t">String</span>]) {
+        <span class="k">switch</span> screenName {
+        <span class="k">case</span> <span class="s">"promo_screen"</span>:
+            path.<span class="fn">append</span>(<span class="t">AppRoute</span>.promoScreen(promoCode: payload[<span class="s">"promoCode"</span>]))
+        <span class="k">case</span> <span class="s">"onboarding_variant_b"</span>:
+            path.<span class="fn">append</span>(<span class="t">AppRoute</span>.onboardingVariantB)
+        <span class="k">case</span> <span class="s">"product_detail"</span>:
+            <span class="k">guard let</span> id = payload[<span class="s">"productId"</span>] <span class="k">else</span> { <span class="k">return</span> }
+            path.<span class="fn">append</span>(<span class="t">AppRoute</span>.productDetail(id: id))
+        <span class="k">case</span> <span class="s">"challenge_invite"</span>:
+            path.<span class="fn">append</span>(<span class="t">AppRoute</span>.challengeInvite)
+        <span class="k">case</span> <span class="s">"referral_success"</span>:
+            path.<span class="fn">append</span>(<span class="t">AppRoute</span>.referralSuccess(referrerName: nil))
+        <span class="k">default</span>:
+            <span class="k">break</span>
+        }
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="impl-card">
+        <h3>4 — Trigger After Sign-Up</h3>
+        <p class="impl-desc">Inject the router into your sign-up view and call <code>checkDeferredDeepLink</code> as soon as the user's account is created.</p>
+        <div class="code-panel">
+          <div class="code-header">
+            <span class="code-lang">Swift</span>
+            <span style="font-size:11px;color:var(--text-muted);">SignUpView.swift</span>
+          </div>
+          <pre><span class="k">struct</span> <span class="t">SignUpView</span>: <span class="t">View</span> {
+    <span class="k">@EnvironmentObject private var</span> router: <span class="t">AppRouter</span>
+    <span class="k">@State private var</span> isLoading = <span class="n">false</span>
+
+    <span class="k">var</span> body: <span class="k">some</span> <span class="t">View</span> {
+        <span class="t">VStack</span> {
+            <span class="c">// ... sign-up form UI ...</span>
+
+            <span class="t">Button</span>(<span class="s">"Create Account"</span>) {
+                <span class="t">Task</span> { <span class="k">await</span> <span class="fn">handleSignUp</span>() }
+            }
+        }
+    }
+
+    <span class="k">private func</span> <span class="fn">handleSignUp</span>() <span class="k">async</span> {
+        isLoading = <span class="n">true</span>
+        <span class="k">defer</span> { isLoading = <span class="n">false</span> }
+
+        <span class="c">// 1. Create the user account in your backend</span>
+        <span class="k">let</span> userId = <span class="k">try await</span> <span class="t">AuthService</span>.<span class="fn">signUp</span>(...)
+
+        <span class="c">// 2. Check for a deferred deep link — navigates if attributed</span>
+        router.<span class="fn">checkDeferredDeepLink</span>(userId: userId)
+    }
+}</pre>
+        </div>
+      </div>
+
+    </div><!-- end #platform-ios -->
+
+    <!-- Android -->
+    <div id="platform-android" class="platform-content">
+
+      <div class="sub-tabs">
+        <div class="sub-tab active" onclick="switchSubTab('jetpack')">Jetpack Navigation</div>
+        <div class="sub-tab" onclick="switchSubTab('intent')">Intent-based</div>
+      </div>
+
+      <!-- Jetpack -->
+      <div id="sub-jetpack" class="sub-content active">
+
+        <div class="impl-card">
+          <h3>1 — Attribution Data Classes</h3>
+          <p class="impl-desc">Kotlin data classes matching the API response. Place in your data/models layer.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">AttributionModels.kt</span>
+            </div>
+            <pre><span class="k">data class</span> <span class="t">AttributionResponse</span>(
+    <span class="k">val</span> success: <span class="t">Boolean</span>,
+    <span class="k">val</span> data:    <span class="t">AttributionData</span>
+)
+
+<span class="k">data class</span> <span class="t">AttributionData</span>(
+    <span class="k">val</span> attributed:         <span class="t">Boolean</span>,
+    <span class="k">val</span> referrerIdentifier: <span class="t">String</span>?,
+    <span class="k">val</span> campaign:           <span class="t">String</span>?,
+    <span class="k">val</span> source:             <span class="t">String</span>?,
+    <span class="k">val</span> customPayload:      <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;?
+)</pre>
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <h3>2 — Attribution Repository</h3>
+          <p class="impl-desc">A coroutine-based repository using Retrofit (or any HTTP client). Swap the Retrofit interface for OkHttp if you prefer.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">AttributionRepository.kt</span>
+            </div>
+            <pre><span class="k">interface</span> <span class="t">LinkTraceApi</span> {
+    <span class="n">@POST</span>(<span class="s">"/api/v1/attributions"</span>)
+    <span class="n">@Headers</span>(<span class="s">"x-api-key: YOUR_API_KEY"</span>)
+    <span class="k">suspend fun</span> <span class="fn">fetchAttribution</span>(
+        <span class="n">@Body</span> body: <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;
+    ): <span class="t">AttributionResponse</span>
+}
+
+<span class="k">class</span> <span class="t">AttributionRepository</span>(<span class="k">private val</span> api: <span class="t">LinkTraceApi</span>) {
+
+    <span class="k">suspend fun</span> <span class="fn">fetchAttribution</span>(userId: <span class="t">String</span>): <span class="t">Result</span>&lt;<span class="t">AttributionData</span>&gt; =
+        <span class="fn">runCatching</span> { api.<span class="fn">fetchAttribution</span>(mapOf(<span class="s">"userId"</span> to userId)).data }
+}</pre>
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <h3>3 — ViewModel</h3>
+          <p class="impl-desc">Expose a <code>SharedFlow</code> event so the Fragment/Activity can react to navigation without coupling to the NavController.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">SignUpViewModel.kt</span>
+            </div>
+            <pre><span class="k">sealed class</span> <span class="t">DeepLinkDestination</span> {
+    <span class="k">data class</span> <span class="t">PromoScreen</span>(<span class="k">val</span> promoCode: <span class="t">String</span>?): <span class="t">DeepLinkDestination</span>()
+    <span class="k">object</span>     <span class="t">OnboardingVariantB</span>:                   <span class="t">DeepLinkDestination</span>()
+    <span class="k">data class</span> <span class="t">ProductDetail</span>(<span class="k">val</span> productId: <span class="t">String</span>):  <span class="t">DeepLinkDestination</span>()
+    <span class="k">object</span>     <span class="t">ChallengeInvite</span>:                      <span class="t">DeepLinkDestination</span>()
+}
+
+<span class="k">class</span> <span class="t">SignUpViewModel</span>(<span class="k">private val</span> repo: <span class="t">AttributionRepository</span>) : <span class="t">ViewModel</span>() {
+
+    <span class="k">private val</span> _deepLink = <span class="t">MutableSharedFlow</span>&lt;<span class="t">DeepLinkDestination</span>&gt;()
+    <span class="k">val</span> deepLink: <span class="t">SharedFlow</span>&lt;<span class="t">DeepLinkDestination</span>&gt; = _deepLink.<span class="fn">asSharedFlow</span>()
+
+    <span class="k">private val</span> prefs = <span class="c">/* inject SharedPreferences */</span>
+
+    <span class="k">fun</span> <span class="fn">checkDeferredDeepLink</span>(userId: <span class="t">String</span>) {
+        <span class="k">if</span> (prefs.<span class="fn">getBoolean</span>(<span class="s">"lt_attribution_checked"</span>, <span class="n">false</span>)) <span class="k">return</span>
+
+        viewModelScope.<span class="fn">launch</span> {
+            repo.<span class="fn">fetchAttribution</span>(userId)
+                .<span class="fn">onSuccess</span> { data ->
+                    prefs.<span class="fn">edit</span>().<span class="fn">putBoolean</span>(<span class="s">"lt_attribution_checked"</span>, <span class="n">true</span>).<span class="fn">apply</span>()
+                    <span class="k">if</span> (!data.attributed) <span class="k">return</span><span class="n">@onSuccess</span>
+                    <span class="k">val</span> payload    = data.customPayload ?: <span class="k">return</span><span class="n">@onSuccess</span>
+                    <span class="k">val</span> screenName = payload[<span class="s">"screenName"</span>] ?: <span class="k">return</span><span class="n">@onSuccess</span>
+                    <span class="fn">resolveDestination</span>(screenName, payload)?.<span class="fn">let</span> { _deepLink.<span class="fn">emit</span>(it) }
+                }
+        }
+    }
+
+    <span class="k">private fun</span> <span class="fn">resolveDestination</span>(
+        screenName: <span class="t">String</span>,
+        payload: <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;
+    ): <span class="t">DeepLinkDestination</span>? = <span class="k">when</span> (screenName) {
+        <span class="s">"promo_screen"</span>         -> <span class="t">DeepLinkDestination</span>.<span class="t">PromoScreen</span>(payload[<span class="s">"promoCode"</span>])
+        <span class="s">"onboarding_variant_b"</span> -> <span class="t">DeepLinkDestination</span>.<span class="t">OnboardingVariantB</span>
+        <span class="s">"product_detail"</span>       -> payload[<span class="s">"productId"</span>]?.<span class="fn">let</span> { <span class="t">DeepLinkDestination</span>.<span class="t">ProductDetail</span>(it) }
+        <span class="s">"challenge_invite"</span>     -> <span class="t">DeepLinkDestination</span>.<span class="t">ChallengeInvite</span>
+        <span class="k">else</span>                   -> <span class="n">null</span>
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <h3>4 — Fragment — Collect &amp; Navigate</h3>
+          <p class="impl-desc">Observe the <code>deepLink</code> flow in your post-signup Fragment and navigate using the Jetpack <code>NavController</code>.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">SignUpFragment.kt</span>
+            </div>
+            <pre><span class="k">class</span> <span class="t">SignUpFragment</span> : <span class="t">Fragment</span>() {
+
+    <span class="k">private val</span> viewModel: <span class="t">SignUpViewModel</span> <span class="k">by</span> <span class="fn">viewModels</span>()
+
+    <span class="k">override fun</span> <span class="fn">onViewCreated</span>(view: <span class="t">View</span>, savedInstanceState: <span class="t">Bundle</span>?) {
+        <span class="k">super</span>.<span class="fn">onViewCreated</span>(view, savedInstanceState)
+
+        <span class="c">// Observe deep link navigation events</span>
+        viewLifecycleOwner.lifecycleScope.<span class="fn">launch</span> {
+            repeatOnLifecycle(<span class="t">Lifecycle</span>.<span class="t">State</span>.<span class="n">STARTED</span>) {
+                viewModel.deepLink.<span class="fn">collect</span> { destination ->
+                    <span class="fn">navigateTo</span>(destination)
+                }
+            }
+        }
+
+        <span class="c">// Sign-up button</span>
+        binding.btnCreateAccount.<span class="fn">setOnClickListener</span> {
+            lifecycleScope.<span class="fn">launch</span> {
+                <span class="k">val</span> userId = <span class="fn">performSignUp</span>()   <span class="c">// your auth call</span>
+                viewModel.<span class="fn">checkDeferredDeepLink</span>(userId)
+            }
+        }
+    }
+
+    <span class="k">private fun</span> <span class="fn">navigateTo</span>(destination: <span class="t">DeepLinkDestination</span>) {
+        <span class="k">val</span> navController = <span class="fn">findNavController</span>()
+        <span class="k">when</span> (destination) {
+            <span class="k">is</span> <span class="t">DeepLinkDestination</span>.<span class="t">PromoScreen</span> -> {
+                <span class="k">val</span> args = <span class="t">PromoFragmentArgs</span>(promoCode = destination.promoCode)
+                navController.<span class="fn">navigate</span>(<span class="t">R</span>.id.action_signUp_to_promo, args.<span class="fn">toBundle</span>())
+            }
+            <span class="t">DeepLinkDestination</span>.<span class="t">OnboardingVariantB</span> ->
+                navController.<span class="fn">navigate</span>(<span class="t">R</span>.id.action_signUp_to_onboardingB)
+            <span class="k">is</span> <span class="t">DeepLinkDestination</span>.<span class="t">ProductDetail</span> -> {
+                <span class="k">val</span> args = <span class="t">ProductDetailFragmentArgs</span>(productId = destination.productId)
+                navController.<span class="fn">navigate</span>(<span class="t">R</span>.id.action_signUp_to_productDetail, args.<span class="fn">toBundle</span>())
+            }
+            <span class="t">DeepLinkDestination</span>.<span class="t">ChallengeInvite</span> ->
+                navController.<span class="fn">navigate</span>(<span class="t">R</span>.id.action_signUp_to_challenge)
+        }
+    }
+}</pre>
+          </div>
+        </div>
+
+      </div><!-- end #sub-jetpack -->
+
+      <!-- Intent-based -->
+      <div id="sub-intent" class="sub-content">
+
+        <div class="impl-card">
+          <h3>1 — Attribution Data Classes</h3>
+          <p class="impl-desc">Same models as the Jetpack approach — reuse them.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">AttributionModels.kt</span>
+            </div>
+            <pre><span class="k">data class</span> <span class="t">AttributionData</span>(
+    <span class="k">val</span> attributed:         <span class="t">Boolean</span>,
+    <span class="k">val</span> referrerIdentifier: <span class="t">String</span>?,
+    <span class="k">val</span> campaign:           <span class="t">String</span>?,
+    <span class="k">val</span> customPayload:      <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;?
+)</pre>
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <h3>2 — DeepLinkHandler Utility</h3>
+          <p class="impl-desc">A standalone object that builds and fires the correct Intent from the attribution data. No nav graph required.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">DeepLinkHandler.kt</span>
+            </div>
+            <pre><span class="k">object</span> <span class="t">DeepLinkHandler</span> {
+
+    <span class="c">// Intent extras keys — keep in sync with target Activities</span>
+    <span class="k">const val</span> EXTRA_PROMO_CODE  = <span class="s">"extra_promo_code"</span>
+    <span class="k">const val</span> EXTRA_PRODUCT_ID  = <span class="s">"extra_product_id"</span>
+
+    <span class="k">fun</span> <span class="fn">handle</span>(context: <span class="t">Context</span>, data: <span class="t">AttributionData</span>): <span class="t">Boolean</span> {
+        <span class="k">if</span> (!data.attributed) <span class="k">return false</span>
+
+        <span class="k">val</span> payload    = data.customPayload ?: <span class="k">return false</span>
+        <span class="k">val</span> screenName = payload[<span class="s">"screenName"</span>] ?: <span class="k">return false</span>
+
+        <span class="k">val</span> intent = <span class="fn">buildIntent</span>(context, screenName, payload) ?: <span class="k">return false</span>
+        <span class="c">// Clear the sign-up stack so Back doesn't return to it</span>
+        intent.<span class="fn">addFlags</span>(<span class="t">Intent</span>.<span class="n">FLAG_ACTIVITY_CLEAR_TOP</span> <span class="k">or</span> <span class="t">Intent</span>.<span class="n">FLAG_ACTIVITY_NEW_TASK</span>)
+        context.<span class="fn">startActivity</span>(intent)
+        <span class="k">return true</span>
+    }
+
+    <span class="k">private fun</span> <span class="fn">buildIntent</span>(
+        context: <span class="t">Context</span>,
+        screenName: <span class="t">String</span>,
+        payload: <span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;
+    ): <span class="t">Intent</span>? = <span class="k">when</span> (screenName) {
+        <span class="s">"promo_screen"</span> ->
+            <span class="t">Intent</span>(context, <span class="t">PromoActivity</span>::<span class="k">class</span>.java).<span class="fn">apply</span> {
+                <span class="fn">putExtra</span>(<span class="n">EXTRA_PROMO_CODE</span>, payload[<span class="s">"promoCode"</span>])
+            }
+        <span class="s">"onboarding_variant_b"</span> ->
+            <span class="t">Intent</span>(context, <span class="t">OnboardingVariantBActivity</span>::<span class="k">class</span>.java)
+        <span class="s">"product_detail"</span> ->
+            payload[<span class="s">"productId"</span>]?.<span class="fn">let</span> { id ->
+                <span class="t">Intent</span>(context, <span class="t">ProductDetailActivity</span>::<span class="k">class</span>.java).<span class="fn">apply</span> {
+                    <span class="fn">putExtra</span>(<span class="n">EXTRA_PRODUCT_ID</span>, id)
+                }
+            }
+        <span class="s">"challenge_invite"</span> ->
+            <span class="t">Intent</span>(context, <span class="t">ChallengeActivity</span>::<span class="k">class</span>.java)
+        <span class="k">else</span> -> <span class="n">null</span>
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <h3>3 — Trigger From SignUpActivity</h3>
+          <p class="impl-desc">After your auth call succeeds, fetch attribution and pass the result to <code>DeepLinkHandler</code>.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">SignUpActivity.kt</span>
+            </div>
+            <pre><span class="k">class</span> <span class="t">SignUpActivity</span> : <span class="t">AppCompatActivity</span>() {
+
+    <span class="k">private val</span> repo  = <span class="t">AttributionRepository</span>(<span class="c">/* inject */</span>)
+    <span class="k">private val</span> prefs <span class="k">by lazy</span> { <span class="fn">getSharedPreferences</span>(<span class="s">"lt_prefs"</span>, <span class="t">Context</span>.<span class="n">MODE_PRIVATE</span>) }
+
+    <span class="k">private fun</span> <span class="fn">onSignUpSuccess</span>(userId: <span class="t">String</span>) {
+        <span class="k">if</span> (prefs.<span class="fn">getBoolean</span>(<span class="s">"lt_attribution_checked"</span>, <span class="n">false</span>)) {
+            <span class="fn">goToHome</span>()
+            <span class="k">return</span>
+        }
+
+        lifecycleScope.<span class="fn">launch</span> {
+            repo.<span class="fn">fetchAttribution</span>(userId)
+                .<span class="fn">onSuccess</span> { data ->
+                    prefs.<span class="fn">edit</span>().<span class="fn">putBoolean</span>(<span class="s">"lt_attribution_checked"</span>, <span class="n">true</span>).<span class="fn">apply</span>()
+                    <span class="k">val</span> handled = <span class="t">DeepLinkHandler</span>.<span class="fn">handle</span>(<span class="k">this</span><span class="n">@SignUpActivity</span>, data)
+                    <span class="k">if</span> (!handled) <span class="fn">goToHome</span>()
+                }
+                .<span class="fn">onFailure</span> { <span class="fn">goToHome</span>() }  <span class="c">// attribution failure is non-fatal</span>
+        }
+    }
+
+    <span class="k">private fun</span> <span class="fn">goToHome</span>() {
+        <span class="fn">startActivity</span>(<span class="t">Intent</span>(<span class="k">this</span>, <span class="t">HomeActivity</span>::<span class="k">class</span>.java))
+        <span class="fn">finish</span>()
+    }
+}</pre>
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <h3>4 — Receiving Extras in the Target Activity</h3>
+          <p class="impl-desc">Read the Intent extras passed by <code>DeepLinkHandler</code> in the launched Activity's <code>onCreate</code>.</p>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">Kotlin</span>
+              <span style="font-size:11px;color:var(--text-muted);">PromoActivity.kt</span>
+            </div>
+            <pre><span class="k">class</span> <span class="t">PromoActivity</span> : <span class="t">AppCompatActivity</span>() {
+
+    <span class="k">override fun</span> <span class="fn">onCreate</span>(savedInstanceState: <span class="t">Bundle</span>?) {
+        <span class="k">super</span>.<span class="fn">onCreate</span>(savedInstanceState)
+        <span class="fn">setContentView</span>(<span class="t">R</span>.layout.activity_promo)
+
+        <span class="k">val</span> promoCode = intent.<span class="fn">getStringExtra</span>(<span class="t">DeepLinkHandler</span>.<span class="n">EXTRA_PROMO_CODE</span>)
+        <span class="k">if</span> (promoCode != <span class="n">null</span>) {
+            <span class="fn">applyPromoCode</span>(promoCode)
+        }
+    }
+
+    <span class="k">private fun</span> <span class="fn">applyPromoCode</span>(code: <span class="t">String</span>) {
+        <span class="c">// Auto-fill or validate the promo code in your UI</span>
+    }
+}</pre>
+          </div>
+        </div>
+
+      </div><!-- end #sub-intent -->
+
+    </div><!-- end #platform-android -->
+
+  </div><!-- end .platform-section -->
+
+  <!-- Best Practices -->
+  <div class="rules-section">
+    <div class="section-label">Best Practices</div>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-icon">🔁</div>
+        <div class="rule-text">
+          <strong>Gate behind a one-time flag</strong>
+          Persist a <code>hasCheckedAttribution</code> boolean in local storage. Check it before calling the Attribution API — this prevents duplicate calls on subsequent launches.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🛡️</div>
+        <div class="rule-text">
+          <strong>Always handle attributed: false</strong>
+          Attribution failure or no-match is the common case for organic installs. Your app must have a clean default post-signup flow that runs when no deep link is present.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">📦</div>
+        <div class="rule-text">
+          <strong>Keep screenName values in a shared constant</strong>
+          Define screen name strings in a single file (e.g. <code>DeepLinkScreens.kt</code> / <code>DeepLinkRoutes.swift</code>) shared between link creation and navigation logic to avoid typo mismatches.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🧪</div>
+        <div class="rule-text">
+          <strong>Test with environment: "stage"</strong>
+          Always create test links with <code>"environment": "stage"</code> to validate the full deferred deep linking flow end-to-end without polluting production attribution data.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">⏰</div>
+        <div class="rule-text">
+          <strong>Attribution window is 24 hours</strong>
+          The user must install within 24 hours of clicking the link. If the window expires, the Attribution API returns <code>attributed: false</code> — your default flow takes over. Set expectations accordingly in QA.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🔤</div>
+        <div class="rule-text">
+          <strong>customPayload values must be strings</strong>
+          All values in <code>customPayload</code> are strings. For numeric IDs or booleans, stringify on encode and parse on receipt (e.g. <code>"productId": "42"</code>, not <code>"productId": 42</code>).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>LinkTrace &mdash; Mobile Attribution API &nbsp;·&nbsp; <a href="https://linktrace.in">linktrace.in</a></p>
+    <p style="margin-top:6px;font-size:12px;">Base URL: <span style="font-family:var(--mono);color:#89dceb;">https://api.linktrace.in</span></p>
+  </footer>
+
+</div>
+
+<script>
+  function switchPlatform(platform) {
+    document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.platform-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.platform-tab[onclick="switchPlatform('${platform}')"]`).classList.add('active');
+    document.getElementById(`platform-${platform}`).classList.add('active');
+  }
+
+  function switchSubTab(tab) {
+    document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.sub-tab[onclick="switchSubTab('${tab}')"]`).classList.add('active');
+    document.getElementById(`sub-${tab}`).classList.add('active');
+  }
+</script>
+</body>
+</html>
