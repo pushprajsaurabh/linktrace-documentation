@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkTrace — API Reference</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #181c27;
+      --surface2: #1e2335;
+      --border: #2a2f45;
+      --accent: #6366f1;
+      --accent-dim: #3730a3;
+      --green: #22c55e;
+      --green-dim: #14532d;
+      --red: #ef4444;
+      --red-dim: #450a0a;
+      --yellow: #f59e0b;
+      --yellow-dim: #451a03;
+      --blue: #3b82f6;
+      --blue-dim: #1e3a5f;
+      --purple: #a855f7;
+      --purple-dim: #2e1065;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --code-bg: #0d1117;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      padding: 40px 20px 80px;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 48px 0 56px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .logo-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: var(--text-dim);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── Nav sidebar (TOC) ── */
+    .toc-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 56px;
+    }
+
+    .toc-bar h2 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      font-size: 13px;
+      color: var(--text-dim);
+      transition: all 0.12s ease;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      min-width: 0;
+    }
+
+    .toc-item:hover { color: var(--text); border-color: #3a4060; }
+
+    .toc-method {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .m-get  { background: #1a3a1a; color: #4ade80; border: 1px solid #166534; }
+    .m-post { background: #1a2a4a; color: #60a5fa; border: 1px solid #1d4ed8; }
+
+    /* ── Concept box ── */
+    .concept-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+    }
+
+    .concept-box h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .concept-box p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .concept-box p:last-child { margin-bottom: 0; }
+
+    /* ── Info / Warning callouts ── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      border: 1px solid;
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-body strong { font-weight: 600; display: block; margin-bottom: 4px; }
+
+    .callout-info   { background: #0f1e38; border-color: #1d4ed8; color: #93c5fd; }
+    .callout-warn   { background: #1c1200; border-color: #b45309; color: #fcd34d; }
+    .callout-scale  { background: #1a0a2e; border-color: #7c3aed; color: #c4b5fd; }
+    .callout-success { background: #0a1f0a; border-color: #166534; color: #86efac; }
+
+    /* ── Section heading ── */
+    .section-heading {
+      margin-bottom: 32px;
+      padding-top: 24px;
+    }
+
+    .section-heading h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+
+    .section-heading p {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    /* ── API endpoint card ── */
+    .endpoint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .method-pill {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .pill-get  { background: #1a3a1a; color: #4ade80; border: 1px solid #166534; }
+    .pill-post { background: #1a2a4a; color: #60a5fa; border: 1px solid #1d4ed8; }
+
+    .endpoint-meta { flex: 1; }
+
+    .endpoint-path {
+      font-family: var(--mono);
+      font-size: 16px;
+      color: #e2e8f0;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .endpoint-path .path-param { color: #f9e2af; }
+
+    .endpoint-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .endpoint-tags {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .etag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid;
+    }
+
+    .etag-scale  { color: #c4b5fd; background: #2e1065; border-color: #7c3aed; }
+    .etag-auth   { color: #93c5fd; background: #1e3a5f; border-color: #2563eb; }
+
+    .endpoint-body {
+      padding: 24px 28px;
+    }
+
+    /* ── Param / field table ── */
+    .param-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      margin-top: 24px;
+    }
+
+    .param-section-title:first-child { margin-top: 0; }
+
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .param-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .param-table td {
+      padding: 10px 12px;
+      vertical-align: top;
+      border-bottom: 1px solid #1f2537;
+      line-height: 1.5;
+    }
+
+    .param-table tr:last-child td { border-bottom: none; }
+
+    .param-table tr:hover td { background: #161b27; }
+
+    .p-name {
+      font-family: var(--mono);
+      color: #89b4fa;
+      white-space: nowrap;
+    }
+
+    .p-type {
+      font-family: var(--mono);
+      color: #cba6f7;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .p-req {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .req-yes { background: #1a3a1a; color: #4ade80; border: 1px solid #166534; }
+    .req-no  { background: #1e1e1e; color: var(--text-muted); border: 1px solid var(--border); }
+
+    .p-desc { color: var(--text-dim); }
+    .p-desc code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: #cba6f7;
+    }
+
+    /* ── Code panels ── */
+    .code-panel {
+      background: var(--code-bg);
+      border: 1px solid #1e2535;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #161b27;
+      border-bottom: 1px solid #1e2535;
+    }
+
+    .code-lang {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .code-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    pre {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #cdd6f4;
+    }
+
+    /* syntax colours */
+    .k  { color: #cba6f7; }   /* key / keyword */
+    .s  { color: #a6e3a1; }   /* string value */
+    .n  { color: #fab387; }   /* number */
+    .c  { color: #585b70; }   /* comment */
+    .kw { color: #89b4fa; }   /* language keyword */
+    .fn { color: #f9e2af; }   /* function / url segment */
+    .u  { color: #f38ba8; }   /* reserved / warning */
+
+    /* ── Response status pills ── */
+    .responses-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .responses-grid { grid-template-columns: 1fr; }
+    }
+
+    .resp-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .resp-code {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .resp-200 { color: #4ade80; }
+    .resp-201 { color: #34d399; }
+    .resp-202 { color: #60a5fa; }
+    .resp-400 { color: #fb923c; }
+    .resp-403 { color: #f87171; }
+    .resp-404 { color: #f87171; }
+    .resp-429 { color: #fbbf24; }
+
+    .resp-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+    .resp-desc strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 2px; }
+
+    /* ── Two-column ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+      .endpoint-header { flex-direction: column; gap: 12px; }
+      .endpoint-tags { flex-wrap: wrap; }
+    }
+
+    .col-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── Section divider ── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 56px 0;
+    }
+
+    /* ── Inline code ── */
+    .inline-code {
+      display: inline;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #cba6f7;
+    }
+
+    /* ── Auth overview table ── */
+    .auth-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .auth-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .auth-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #1f2537;
+      vertical-align: top;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .auth-table tr:last-child td { border-bottom: none; }
+    .auth-table tr:hover td { background: #161b27; }
+
+    /* ── Quota meter visual ── */
+    .quota-bar-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 16px;
+    }
+
+    .quota-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .quota-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .quota-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #6366f1 0%, #a855f7 60%, #ef4444 100%);
+      width: 80%;
+    }
+
+    .quota-legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .quota-legend-item { display: flex; align-items: center; gap: 6px; }
+    .ql-dot { width: 8px; height: 8px; border-radius: 2px; }
+    .ql-normal { background: var(--accent); }
+    .ql-warn   { background: var(--yellow); }
+    .ql-limit  { background: var(--red); }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding-top: 56px;
+      border-top: 1px solid var(--border);
+      margin-top: 80px;
+    }
+
+    .footer p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="logo-badge">
+      <div class="logo-dot"></div>
+      LinkTrace Developers
+    </div>
+    <h1>API Reference</h1>
+    <p class="subtitle">
+      Complete reference for the LinkTrace Client API — event ingestion,
+      analytics, link creation, and install attribution.
+    </p>
+  </div>
+
+  <!-- ── TABLE OF CONTENTS ── -->
+  <div class="toc-bar">
+    <h2>Endpoints in this document</h2>
+    <div class="toc-grid">
+      <a class="toc-item" href="#ingest-event">
+        <span class="toc-method m-post">POST</span>
+        /api/v1/events
+      </a>
+      <a class="toc-item" href="#list-links">
+        <span class="toc-method m-get">GET</span>
+        /api/v1/analytics/referral-links
+      </a>
+      <a class="toc-item" href="#funnel">
+        <span class="toc-method m-get">GET</span>
+        /api/v1/analytics/links/:shortCode/funnel
+      </a>
+      <a class="toc-item" href="#quota">
+        <span class="toc-method m-get">GET</span>
+        /api/v1/analytics/events/quota
+      </a>
+      <a class="toc-item" href="#create-link">
+        <span class="toc-method m-post">POST</span>
+        /api/v1/referral-links
+      </a>
+      <a class="toc-item" href="#attribute">
+        <span class="toc-method m-post">POST</span>
+        /api/v1/attributions
+      </a>
+      <a class="toc-item" href="#metadata">
+        <span class="toc-method m-get">GET</span>
+        /api/v1/referral-links/metadata
+      </a>
+    </div>
+  </div>
+
+  <!-- ── AUTHENTICATION ── -->
+  <div class="section-heading">
+    <p class="section-label">Authentication</p>
+    <h2>API Keys</h2>
+    <p>All client endpoints are authenticated via an API key passed in the request header.</p>
+  </div>
+
+  <div class="concept-box">
+    <h2>How to authenticate</h2>
+    <p>
+      Every request must include your API key in the <span class="inline-code">x-api-key</span> HTTP header.
+      You can find your key in the LinkTrace dashboard under <strong>Settings → API Keys</strong>.
+    </p>
+    <div class="code-panel">
+      <div class="code-header">
+        <span class="code-lang">HTTP Header</span>
+      </div>
+      <pre><span class="k">x-api-key</span>: <span class="s">lt_live_xxxxxxxxxxxxxxxxxxxx</span></pre>
+    </div>
+    <div class="callout callout-warn" style="margin-top: 20px;">
+      <span class="callout-icon">⚠</span>
+      <div class="callout-body">
+        <strong>Keep your API key secret.</strong>
+        Never expose it in client-side JavaScript, mobile app binaries, or public repositories.
+        Rotate it immediately from the dashboard if you suspect compromise.
+      </div>
+    </div>
+  </div>
+
+  <div class="concept-box" style="margin-top: 0;">
+    <h2>Plan requirements</h2>
+    <table class="auth-table">
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>Free Plan</th>
+          <th>Scale Plan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="inline-code">POST /api/v1/referral-links</span></td>
+          <td style="color: #4ade80;">✓ Available</td>
+          <td style="color: #4ade80;">✓ Available</td>
+        </tr>
+        <tr>
+          <td><span class="inline-code">POST /api/v1/attributions</span></td>
+          <td style="color: #4ade80;">✓ Available</td>
+          <td style="color: #4ade80;">✓ Available</td>
+        </tr>
+        <tr>
+          <td><span class="inline-code">GET /api/v1/analytics/referral-links</span></td>
+          <td style="color: #4ade80;">✓ Available</td>
+          <td style="color: #4ade80;">✓ Available</td>
+        </tr>
+        <tr>
+          <td><span class="inline-code">GET /api/v1/referral-links/metadata</span></td>
+          <td style="color: #4ade80;">✓ Available</td>
+          <td style="color: #4ade80;">✓ Available</td>
+        </tr>
+        <tr>
+          <td><span class="inline-code">POST /api/v1/events</span></td>
+          <td style="color: #f87171;">✗ Scale only</td>
+          <td style="color: #4ade80;">✓ Available</td>
+        </tr>
+        <tr>
+          <td><span class="inline-code">GET /api/v1/analytics/links/:shortCode/funnel</span></td>
+          <td style="color: #f59e0b;">Partial — no custom events</td>
+          <td style="color: #4ade80;">✓ Full funnel</td>
+        </tr>
+        <tr>
+          <td><span class="inline-code">GET /api/v1/analytics/events/quota</span></td>
+          <td style="color: #f87171;">✗ Scale only</td>
+          <td style="color: #4ade80;">✓ Available</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 1 — EVENT INGESTION
+  ════════════════════════════════════════════ -->
+  <div class="section-heading">
+    <p class="section-label">Event Ingestion</p>
+    <h2>Tracking Custom Events</h2>
+    <p>
+      Custom events let you measure actions in your app — purchases, sign-ups, level completions,
+      anything meaningful — and attribute them back to the referral link that drove the install.
+    </p>
+  </div>
+
+  <div class="callout callout-scale" style="margin-bottom: 32px;">
+    <span class="callout-icon">★</span>
+    <div class="callout-body">
+      <strong>Scale plan required</strong>
+      Event ingestion is available on the Scale plan only. Calls from non-Scale accounts return
+      <span class="inline-code">403 PLAN_UPGRADE_REQUIRED</span>.
+    </div>
+  </div>
+
+  <!-- POST /api/v1/events -->
+  <div class="endpoint" id="ingest-event">
+    <div class="endpoint-header">
+      <div class="method-pill pill-post">POST</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">/api/v1/events</div>
+        <div class="endpoint-desc">Ingest a named event against a referral link's short code. Writes are fire-and-forget — the endpoint responds immediately and the database write happens asynchronously.</div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-scale">Scale</span>
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="param-section-title">Request headers</div>
+      <table class="param-table">
+        <thead><tr><th>Header</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">x-api-key</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">Your LinkTrace API key.</td>
+          </tr>
+          <tr>
+            <td class="p-name">Content-Type</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">Must be <code>application/json</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="param-section-title">Request body</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">linkShortCode</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">The 4–32 character alphanumeric short code of the referral link (e.g. <code>497b3422</code>).</td>
+          </tr>
+          <tr>
+            <td class="p-name">eventName</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">
+              A snake_case event name. Must start with a letter and contain only lowercase letters, digits,
+              and underscores — max 128 characters. Names are normalised to lowercase automatically.
+              <br/><br/>
+              Reserved names (rejected): <code>click</code>, <code>install</code>,
+              <code>impression</code>, <code>open</code>.
+            </td>
+          </tr>
+          <tr>
+            <td class="p-name">entityId</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">
+              A unique identifier for the entity this event represents (e.g. an order ID, user ID, session ID).
+              When provided, LinkTrace deduplicates events: if the same
+              <code>(linkShortCode, eventName, entityId)</code> tuple has already been recorded, the
+              second call returns <code>200 { deduplicated: true }</code> instead of writing a new row.
+              Max 255 characters.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="two-col" style="margin-top: 24px;">
+        <div>
+          <div class="col-label">Basic — no dedup</div>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">JSON</span>
+            </div>
+            <pre>{
+  <span class="k">"linkShortCode"</span>: <span class="s">"497b3422"</span>,
+  <span class="k">"eventName"</span>: <span class="s">"web_link_click"</span>
+}</pre>
+          </div>
+        </div>
+        <div>
+          <div class="col-label">With entityId — deduplication enabled</div>
+          <div class="code-panel">
+            <div class="code-header">
+              <span class="code-lang">JSON</span>
+            </div>
+            <pre>{
+  <span class="k">"linkShortCode"</span>: <span class="s">"497b3422"</span>,
+  <span class="k">"eventName"</span>: <span class="s">"purchase"</span>,
+  <span class="k">"entityId"</span>: <span class="s">"order_9876"</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Responses</div>
+      <div class="responses-grid">
+        <div class="resp-item">
+          <div class="resp-code resp-202">202</div>
+          <div class="resp-desc">
+            <strong>Accepted</strong>
+            Event queued for async write. Normal success path.
+            <div class="code-panel" style="margin-top: 8px;">
+              <pre style="padding: 10px 14px; font-size: 12px;">{ <span class="k">"success"</span>: <span class="kw">true</span>, <span class="k">"queued"</span>: <span class="kw">true</span> }</pre>
+            </div>
+          </div>
+        </div>
+        <div class="resp-item">
+          <div class="resp-code resp-200">200</div>
+          <div class="resp-desc">
+            <strong>Deduplicated</strong>
+            Same <code>(shortCode, eventName, entityId)</code> already recorded.
+            <div class="code-panel" style="margin-top: 8px;">
+              <pre style="padding: 10px 14px; font-size: 12px;">{ <span class="k">"success"</span>: <span class="kw">true</span>, <span class="k">"deduplicated"</span>: <span class="kw">true</span> }</pre>
+            </div>
+          </div>
+        </div>
+        <div class="resp-item">
+          <div class="resp-code resp-429">429</div>
+          <div class="resp-desc">
+            <strong>Quota exceeded</strong>
+            Monthly limit of 5,000 events reached.
+            <div class="code-panel" style="margin-top: 8px;">
+              <pre style="padding: 10px 14px; font-size: 12px;">{ <span class="k">"code"</span>: <span class="s">"QUOTA_EXCEEDED"</span>,
+  <span class="k">"resetsOn"</span>: <span class="s">"2026-07-01T00:00:00.000Z"</span> }</pre>
+            </div>
+          </div>
+        </div>
+        <div class="resp-item">
+          <div class="resp-code resp-403">403</div>
+          <div class="resp-desc">
+            <strong>Plan upgrade required</strong>
+            Account is not on the Scale plan.
+            <div class="code-panel" style="margin-top: 8px;">
+              <pre style="padding: 10px 14px; font-size: 12px;">{ <span class="k">"code"</span>: <span class="s">"PLAN_UPGRADE_REQUIRED"</span> }</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-info" style="margin-top: 20px;">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Quota applies to production events only.</strong>
+          The 5,000 monthly limit tracks only events sent for the <code>production</code> environment.
+          The counter resets on the 1st of each calendar month (UTC).
+          You can monitor remaining quota with
+          <a href="#quota" style="color: #93c5fd;">GET /api/v1/analytics/events/quota</a>.
+        </div>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Code example</div>
+      <div class="code-panel">
+        <div class="code-header">
+          <span class="code-lang">cURL</span>
+        </div>
+        <pre><span class="fn">curl</span> -X POST https://api.linktrace.in/api/v1/events \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "linkShortCode": "497b3422",
+    "eventName": "purchase",
+    "entityId": "order_9876"
+  }'</span></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 2 — ANALYTICS
+  ════════════════════════════════════════════ -->
+  <div class="section-heading">
+    <p class="section-label">Analytics</p>
+    <h2>Link Performance &amp; Funnel Analytics</h2>
+    <p>Query click counts, install attribution, and full conversion funnels across your referral links.</p>
+  </div>
+
+  <!-- GET /api/v1/analytics/referral-links -->
+  <div class="endpoint" id="list-links">
+    <div class="endpoint-header">
+      <div class="method-pill pill-get">GET</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">/api/v1/analytics/referral-links</div>
+        <div class="endpoint-desc">Paginated list of all your referral links with aggregated click and install totals.</div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="param-section-title">Query parameters</div>
+      <table class="param-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">page</td>
+            <td class="p-type">integer</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Page number, starting from <code>1</code>. Defaults to <code>1</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">limit</td>
+            <td class="p-type">integer</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Results per page. Defaults to <code>20</code>, max <code>50</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">status</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Filter by link status: <code>active</code> or <code>inactive</code>. Omit to return all.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="col-label" style="margin-top: 20px;">Example request</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">cURL</span></div>
+        <pre><span class="fn">curl</span> <span class="s">"https://api.linktrace.in/api/v1/analytics/referral-links?page=1&limit=20"</span> \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Response — 200 OK</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">links</td>
+            <td class="p-type">array</td>
+            <td class="p-desc">Array of link objects. Each object contains all link fields plus <code>referralLink</code>, <code>totalClicks</code>, and <code>totalInstalls</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">links[].totalClicks</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">All-time click count for this link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">links[].totalInstalls</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">All-time attributed install count for this link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">pagination.page</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Current page number.</td>
+          </tr>
+          <tr>
+            <td class="p-name">pagination.limit</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Results per page.</td>
+          </tr>
+          <tr>
+            <td class="p-name">pagination.total</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Total number of links across all pages.</td>
+          </tr>
+          <tr>
+            <td class="p-name">pagination.pages</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Total page count.</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- GET /api/v1/analytics/links/:shortCode/funnel -->
+  <div class="endpoint" id="funnel">
+    <div class="endpoint-header">
+      <div class="method-pill pill-get">GET</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">
+          /api/v1/analytics/links/<span class="path-param">:shortCode</span>/funnel
+        </div>
+        <div class="endpoint-desc">
+          Returns a full conversion funnel for a single link: clicks → attributed installs → custom
+          events. Supports custom date ranges. Scale plan accounts additionally receive a per-event
+          breakdown with install-to-conversion rates.
+        </div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="param-section-title">Path parameter</div>
+      <table class="param-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">shortCode</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">The short code of the referral link to analyse.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="param-section-title">Query parameters</div>
+      <table class="param-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">from</td>
+            <td class="p-type">string (YYYY-MM-DD)</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Start of the date range (inclusive). Defaults to 30 days ago.</td>
+          </tr>
+          <tr>
+            <td class="p-name">to</td>
+            <td class="p-type">string (YYYY-MM-DD)</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">End of the date range (inclusive, up to 23:59:59 UTC). Defaults to today.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="col-label" style="margin-top: 20px;">Example request</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">cURL</span></div>
+        <pre><span class="fn">curl</span> <span class="s">"https://api.linktrace.in/api/v1/analytics/links/497b3422/funnel?from=2026-05-01&to=2026-06-10"</span> \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Response — 200 OK</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">shortCode</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">The queried short code.</td>
+          </tr>
+          <tr>
+            <td class="p-name">period.from</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">Resolved start date used for the query.</td>
+          </tr>
+          <tr>
+            <td class="p-name">period.to</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">Resolved end date used for the query.</td>
+          </tr>
+          <tr>
+            <td class="p-name">funnel.clicks</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Total link clicks in the period.</td>
+          </tr>
+          <tr>
+            <td class="p-name">funnel.attributedInstalls</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">App installs attributed to this link in the period.</td>
+          </tr>
+          <tr>
+            <td class="p-name">funnel.clicksByDate</td>
+            <td class="p-type">array</td>
+            <td class="p-desc">Daily click breakdown: <code>[{ date: "2026-05-01", count: 42 }, ...]</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">funnel.installsByDate</td>
+            <td class="p-type">array</td>
+            <td class="p-desc">Daily install breakdown: <code>[{ date: "2026-05-01", count: 7 }, ...]</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">funnel.events</td>
+            <td class="p-type">array</td>
+            <td class="p-desc">
+              <strong>Scale plan only.</strong> Per-event summary: <code>[{ eventName: "purchase", count: 15, conversionFromInstall: 0.68 }, ...]</code>.
+              <code>conversionFromInstall</code> is <code>null</code> when there are no attributed installs.
+              Empty array on non-Scale accounts.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="col-label" style="margin-top: 20px;">Example response</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">JSON</span></div>
+        <pre>{
+  <span class="k">"shortCode"</span>: <span class="s">"497b3422"</span>,
+  <span class="k">"period"</span>: { <span class="k">"from"</span>: <span class="s">"2026-05-01"</span>, <span class="k">"to"</span>: <span class="s">"2026-06-10"</span> },
+  <span class="k">"funnel"</span>: {
+    <span class="k">"clicks"</span>: <span class="n">1240</span>,
+    <span class="k">"attributedInstalls"</span>: <span class="n">312</span>,
+    <span class="k">"clicksByDate"</span>: [
+      { <span class="k">"date"</span>: <span class="s">"2026-05-01"</span>, <span class="k">"count"</span>: <span class="n">88</span> },
+      <span class="c">// ...</span>
+    ],
+    <span class="k">"installsByDate"</span>: [
+      { <span class="k">"date"</span>: <span class="s">"2026-05-01"</span>, <span class="k">"count"</span>: <span class="n">21</span> },
+      <span class="c">// ...</span>
+    ],
+    <span class="k">"events"</span>: [
+      {
+        <span class="k">"eventName"</span>: <span class="s">"purchase"</span>,
+        <span class="k">"count"</span>: <span class="n">212</span>,
+        <span class="k">"conversionFromInstall"</span>: <span class="n">0.68</span>
+      },
+      {
+        <span class="k">"eventName"</span>: <span class="s">"add_to_cart"</span>,
+        <span class="k">"count"</span>: <span class="n">287</span>,
+        <span class="k">"conversionFromInstall"</span>: <span class="n">0.92</span>
+      }
+    ]
+  }
+}</pre>
+      </div>
+
+      <div class="responses-grid" style="margin-top: 20px;">
+        <div class="resp-item">
+          <div class="resp-code resp-400">400</div>
+          <div class="resp-desc">
+            <strong>INVALID_DATE_RANGE</strong>
+            <code>from</code> date is after <code>to</code> date.
+          </div>
+        </div>
+        <div class="resp-item">
+          <div class="resp-code resp-404">404</div>
+          <div class="resp-desc">
+            <strong>LINK_NOT_FOUND</strong>
+            No link with that short code exists for your account.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GET /api/v1/analytics/events/quota -->
+  <div class="endpoint" id="quota">
+    <div class="endpoint-header">
+      <div class="method-pill pill-get">GET</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">/api/v1/analytics/events/quota</div>
+        <div class="endpoint-desc">Returns your current monthly event quota usage, including remaining capacity, warning status, and the reset timestamp.</div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-scale">Scale</span>
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="col-label">Example request</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">cURL</span></div>
+        <pre><span class="fn">curl</span> https://api.linktrace.in/api/v1/analytics/events/quota \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Response fields — 200 OK</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">plan</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">Always <code>"scale"</code> for this endpoint.</td>
+          </tr>
+          <tr>
+            <td class="p-name">monthKey</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">The billing month being measured, e.g. <code>"2026-06"</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">quota</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Total monthly event allowance. Currently <strong>5,000</strong>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">used</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Events ingested so far this month.</td>
+          </tr>
+          <tr>
+            <td class="p-name">remaining</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Events remaining before the quota is exhausted.</td>
+          </tr>
+          <tr>
+            <td class="p-name">percentUsed</td>
+            <td class="p-type">number</td>
+            <td class="p-desc">Percentage of quota consumed, e.g. <code>78.40</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">nearQuota</td>
+            <td class="p-type">boolean</td>
+            <td class="p-desc"><code>true</code> when <code>used ≥ 4,000</code> (80% threshold). Use this to alert your team.</td>
+          </tr>
+          <tr>
+            <td class="p-name">quotaExceeded</td>
+            <td class="p-type">boolean</td>
+            <td class="p-desc"><code>true</code> when the monthly limit has been fully consumed. Ingestion calls return <code>429</code> in this state.</td>
+          </tr>
+          <tr>
+            <td class="p-name">resetsOn</td>
+            <td class="p-type">string (ISO 8601)</td>
+            <td class="p-desc">UTC timestamp of the 1st of next month, when the quota counter resets to zero.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="quota-bar-wrap">
+        <div class="quota-bar-label">
+          <span>Monthly event quota</span>
+          <span>4,000 / 5,000 used</span>
+        </div>
+        <div class="quota-bar"><div class="quota-bar-fill"></div></div>
+        <div class="quota-legend">
+          <div class="quota-legend-item"><div class="ql-dot ql-normal"></div> 0–3,999: Normal</div>
+          <div class="quota-legend-item"><div class="ql-dot ql-warn"></div> 4,000–4,999: <code>nearQuota: true</code></div>
+          <div class="quota-legend-item"><div class="ql-dot ql-limit"></div> 5,000+: <code>quotaExceeded: true</code></div>
+        </div>
+      </div>
+
+      <div class="col-label" style="margin-top: 20px;">Example response</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">JSON</span></div>
+        <pre>{
+  <span class="k">"plan"</span>: <span class="s">"scale"</span>,
+  <span class="k">"monthKey"</span>: <span class="s">"2026-06"</span>,
+  <span class="k">"quota"</span>: <span class="n">5000</span>,
+  <span class="k">"used"</span>: <span class="n">4000</span>,
+  <span class="k">"remaining"</span>: <span class="n">1000</span>,
+  <span class="k">"percentUsed"</span>: <span class="n">80.00</span>,
+  <span class="k">"nearQuota"</span>: <span class="kw">true</span>,
+  <span class="k">"quotaExceeded"</span>: <span class="kw">false</span>,
+  <span class="k">"resetsOn"</span>: <span class="s">"2026-07-01T00:00:00.000Z"</span>
+}</pre>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 3 — LINK CREATION & ATTRIBUTION
+  ════════════════════════════════════════════ -->
+  <div class="section-heading">
+    <p class="section-label">Link Creation &amp; Attribution</p>
+    <h2>Referral Links and Install Attribution</h2>
+    <p>Create trackable referral links server-side and attribute app installs back to the link that drove them.</p>
+  </div>
+
+  <!-- POST /api/v1/referral-links -->
+  <div class="endpoint" id="create-link">
+    <div class="endpoint-header">
+      <div class="method-pill pill-post">POST</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">/api/v1/referral-links</div>
+        <div class="endpoint-desc">Create a new trackable referral link. Returns the short URL along with all link metadata.</div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="param-section-title">Request body</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">referrerIdentifier</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">Your internal identifier for the user or entity generating the link (e.g. a user ID). Used to attribute referrals back to a specific referrer.</td>
+          </tr>
+          <tr>
+            <td class="p-name">environment</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">
+              <code>production</code> (default) or <code>stage</code>.
+              Stage links are excluded from quota counting.
+            </td>
+          </tr>
+          <tr>
+            <td class="p-name">source</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Traffic source (e.g. <code>instagram</code>, <code>email</code>). Max 100 chars.</td>
+          </tr>
+          <tr>
+            <td class="p-name">medium</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Marketing medium (e.g. <code>story</code>, <code>banner</code>). Max 100 chars.</td>
+          </tr>
+          <tr>
+            <td class="p-name">campaign</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Campaign name (e.g. <code>organic_promo_insta</code>). Max 100 chars.</td>
+          </tr>
+          <tr>
+            <td class="p-name">expiryDate</td>
+            <td class="p-type">string (ISO 8601)</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">Date after which this link should be considered expired (e.g. <code>2026-12-31</code>).</td>
+          </tr>
+          <tr>
+            <td class="p-name">customPayload</td>
+            <td class="p-type">object</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">
+              Arbitrary key-value metadata attached to the link and returned in attribution responses.
+              Max <strong>3 keys</strong>. Each key: string, max 50 chars.
+              Each value: string (max 200 chars) or number.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="col-label" style="margin-top: 20px;">Example request</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">JSON</span></div>
+        <pre>{
+  <span class="k">"referrerIdentifier"</span>: <span class="s">"user_id_1234"</span>,
+  <span class="k">"environment"</span>: <span class="s">"production"</span>,
+  <span class="k">"source"</span>: <span class="s">"instagram"</span>,
+  <span class="k">"medium"</span>: <span class="s">"story"</span>,
+  <span class="k">"campaign"</span>: <span class="s">"organic_promo_insta"</span>,
+  <span class="k">"customPayload"</span>: {
+    <span class="k">"referral_source"</span>: <span class="s">"in_app_referral"</span>
+  }
+}</pre>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Response — 201 Created</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">id</td>
+            <td class="p-type">integer</td>
+            <td class="p-desc">Internal database ID of the link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">shortCode</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">The 8-character short code (e.g. <code>497b3422</code>). Use this in event ingestion.</td>
+          </tr>
+          <tr>
+            <td class="p-name">referralLink</td>
+            <td class="p-type">string (URL)</td>
+            <td class="p-desc">The full shareable URL (e.g. <code>https://app.linktrace.in/r/497b3422</code>). Share this with your users.</td>
+          </tr>
+          <tr>
+            <td class="p-name">referrerIdentifier</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">Your identifier as provided in the request.</td>
+          </tr>
+          <tr>
+            <td class="p-name">source / medium / campaign</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">UTM-style attribution fields as provided.</td>
+          </tr>
+          <tr>
+            <td class="p-name">environment</td>
+            <td class="p-type">string</td>
+            <td class="p-desc"><code>production</code> or <code>stage</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">expiryDate</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">ISO 8601 date if set, otherwise null.</td>
+          </tr>
+          <tr>
+            <td class="p-name">customPayload</td>
+            <td class="p-type">object | null</td>
+            <td class="p-desc">The custom metadata as provided.</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- POST /api/v1/attributions -->
+  <div class="endpoint" id="attribute">
+    <div class="endpoint-header">
+      <div class="method-pill pill-post">POST</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">/api/v1/attributions</div>
+        <div class="endpoint-desc">
+          Attribute a new app install to the referral link that drove it. Call this once per user, on first launch
+          after install. LinkTrace uses IP fingerprinting to match the install to a prior link click within a 365-day
+          attribution window.
+        </div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>How attribution works</strong>
+          When a user clicks a referral link, LinkTrace records their IP address. When you call this endpoint
+          with the new user's <code>userId</code>, LinkTrace matches their IP to the most recent unattributed
+          click from the same client account and within the 365-day window. A given
+          <code>userId</code> is only attributed once per client — repeat calls return the existing attribution.
+        </div>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 20px;">Request body</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">userId</td>
+            <td class="p-type">string | integer</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">Your application's identifier for this newly-installed user. Stored as a string internally.</td>
+          </tr>
+          <tr>
+            <td class="p-name">ipAddress</td>
+            <td class="p-type">string (IP)</td>
+            <td><span class="p-req req-no">Optional</span></td>
+            <td class="p-desc">
+              Override the IP address used for fingerprint matching. If omitted, LinkTrace uses the
+              IP of the incoming request. Provide this field when your attribution call is proxied
+              through a backend server and you want to pass the end-user's real IP.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="col-label" style="margin-top: 20px;">Example request</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">JSON</span></div>
+        <pre>{
+  <span class="k">"userId"</span>: <span class="n">50</span>
+}</pre>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Response — 200 OK</div>
+      <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 12px;">
+        The response shape is the same whether attribution succeeds or not — always check the
+        <span class="inline-code">attributed</span> boolean first.
+      </p>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">attributed</td>
+            <td class="p-type">boolean</td>
+            <td class="p-desc"><code>true</code> if a matching click was found and attributed; <code>false</code> if no match.</td>
+          </tr>
+          <tr>
+            <td class="p-name">referrerIdentifier</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">The <code>referrerIdentifier</code> from the matched link. Present when <code>attributed: true</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">source</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">Traffic source from the matched link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">medium</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">Marketing medium from the matched link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">campaign</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">Campaign name from the matched link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">customPayload</td>
+            <td class="p-type">object | null</td>
+            <td class="p-desc">Custom metadata attached to the matched link — use this to pass any data you need at install time.</td>
+          </tr>
+          <tr>
+            <td class="p-name">sourceLinkShortCode</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">The short code of the referral link that was attributed.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="two-col" style="margin-top: 16px;">
+        <div>
+          <div class="col-label">Attributed</div>
+          <div class="code-panel">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="k">"attributed"</span>: <span class="kw">true</span>,
+  <span class="k">"referrerIdentifier"</span>: <span class="s">"user_id_1234"</span>,
+  <span class="k">"source"</span>: <span class="s">"instagram"</span>,
+  <span class="k">"medium"</span>: <span class="s">"story"</span>,
+  <span class="k">"campaign"</span>: <span class="s">"organic_promo_insta"</span>,
+  <span class="k">"customPayload"</span>: {
+    <span class="k">"referral_source"</span>: <span class="s">"in_app_referral"</span>
+  },
+  <span class="k">"sourceLinkShortCode"</span>: <span class="s">"497b3422"</span>
+}</pre>
+          </div>
+        </div>
+        <div>
+          <div class="col-label">Not attributed (no matching click)</div>
+          <div class="code-panel">
+            <div class="code-header"><span class="code-lang">JSON</span></div>
+            <pre>{
+  <span class="k">"attributed"</span>: <span class="kw">false</span>,
+  <span class="k">"sourceLinkShortCode"</span>: <span class="kw">null</span>
+}</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GET /api/v1/referral-links/metadata -->
+  <div class="endpoint" id="metadata">
+    <div class="endpoint-header">
+      <div class="method-pill pill-get">GET</div>
+      <div class="endpoint-meta">
+        <div class="endpoint-path">/api/v1/referral-links/metadata</div>
+        <div class="endpoint-desc">Resolve metadata for a referral link by full URL, path, or bare short code.</div>
+      </div>
+      <div class="endpoint-tags">
+        <span class="etag etag-auth">x-api-key</span>
+      </div>
+    </div>
+
+    <div class="endpoint-body">
+
+      <div class="param-section-title">Query parameters</div>
+      <table class="param-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">link</td>
+            <td class="p-type">string</td>
+            <td><span class="p-req req-yes">Required</span></td>
+            <td class="p-desc">
+              Accepts any of the following formats:
+              <br/>• Full URL: <code>https://app.linktrace.in/r/497b3422</code>
+              <br/>• Path: <code>/r/497b3422</code>
+              <br/>• Bare short code: <code>497b3422</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="col-label" style="margin-top: 20px;">Example request</div>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">cURL</span></div>
+        <pre><span class="fn">curl</span> <span class="s">"https://api.linktrace.in/api/v1/referral-links/metadata?link=https://app.linktrace.in/r/497b3422"</span> \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span></pre>
+      </div>
+
+      <div class="param-section-title" style="margin-top: 24px;">Response fields — 200 OK</div>
+      <table class="param-table">
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="p-name">shortCode</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">The resolved short code.</td>
+          </tr>
+          <tr>
+            <td class="p-name">referrerIdentifier</td>
+            <td class="p-type">string</td>
+            <td class="p-desc">The referrer as set when the link was created.</td>
+          </tr>
+          <tr>
+            <td class="p-name">source / medium / campaign</td>
+            <td class="p-type">string | null</td>
+            <td class="p-desc">UTM-style fields.</td>
+          </tr>
+          <tr>
+            <td class="p-name">environment</td>
+            <td class="p-type">string</td>
+            <td class="p-desc"><code>production</code> or <code>stage</code>.</td>
+          </tr>
+          <tr>
+            <td class="p-name">customPayload</td>
+            <td class="p-type">object | null</td>
+            <td class="p-desc">Custom metadata attached to the link.</td>
+          </tr>
+          <tr>
+            <td class="p-name">active</td>
+            <td class="p-type">boolean</td>
+            <td class="p-desc">Whether the link is currently active.</td>
+          </tr>
+          <tr>
+            <td class="p-name">createdAt</td>
+            <td class="p-type">string (ISO 8601)</td>
+            <td class="p-desc">Timestamp when the link was created.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-warn" style="margin-top: 16px;">
+        <span class="callout-icon">⚠</span>
+        <div class="callout-body">
+          <strong>Privacy by design.</strong>
+          The API returns an identical <code>404 Link not found</code> error whether the link does not exist
+          or belongs to a different account — to prevent link enumeration.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ── ERROR REFERENCE ── -->
+  <div class="section-heading">
+    <p class="section-label">Errors</p>
+    <h2>Error Response Format</h2>
+    <p>All errors follow a consistent JSON envelope.</p>
+  </div>
+
+  <div class="concept-box">
+    <h2>Standard error shape</h2>
+    <div class="code-panel">
+      <div class="code-header"><span class="code-lang">JSON</span></div>
+      <pre>{
+  <span class="k">"success"</span>: <span class="kw">false</span>,
+  <span class="k">"message"</span>: <span class="s">"Human-readable description of what went wrong"</span>,
+  <span class="k">"code"</span>: <span class="s">"MACHINE_READABLE_CODE"</span>,   <span class="c">// present on some errors</span>
+  <span class="k">"resetsOn"</span>: <span class="s">"2026-07-01T00:00:00.000Z"</span> <span class="c">// present on 429 QUOTA_EXCEEDED</span>
+}</pre>
+    </div>
+  </div>
+
+  <table class="param-table" style="margin-top: 8px;">
+    <thead>
+      <tr>
+        <th>HTTP Status</th>
+        <th>Code</th>
+        <th>When it occurs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="resp-code resp-400" style="font-size:13px;">400</span></td>
+        <td class="p-name" style="font-size:12px;">—</td>
+        <td class="p-desc">Validation error — missing or invalid request fields.</td>
+      </tr>
+      <tr>
+        <td><span class="resp-code resp-400" style="font-size:13px;">400</span></td>
+        <td class="p-name" style="font-size:12px;">INVALID_DATE_RANGE</td>
+        <td class="p-desc">The <code>from</code> date is after the <code>to</code> date in a funnel query.</td>
+      </tr>
+      <tr>
+        <td><span class="resp-code resp-403" style="font-size:13px;">403</span></td>
+        <td class="p-name" style="font-size:12px;">PLAN_UPGRADE_REQUIRED</td>
+        <td class="p-desc">The requested endpoint requires the Scale plan.</td>
+      </tr>
+      <tr>
+        <td><span class="resp-code resp-404" style="font-size:13px;">404</span></td>
+        <td class="p-name" style="font-size:12px;">LINK_NOT_FOUND</td>
+        <td class="p-desc">The short code does not exist or belongs to another account.</td>
+      </tr>
+      <tr>
+        <td><span class="resp-code resp-429" style="font-size:13px;">429</span></td>
+        <td class="p-name" style="font-size:12px;">QUOTA_EXCEEDED</td>
+        <td class="p-desc">Monthly event quota (5,000) has been exhausted. <code>resetsOn</code> indicates when the counter resets.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="section-divider" />
+
+  <!-- ── QUICK-START INTEGRATION GUIDE ── -->
+  <div class="section-heading">
+    <p class="section-label">Quick start</p>
+    <h2>End-to-end integration in 4 steps</h2>
+    <p>From link creation to conversion analytics.</p>
+  </div>
+
+  <div class="concept-box">
+    <h2>Step 1 — Create a referral link (server-side)</h2>
+    <p>Generate a unique link for each referrer (user, influencer, campaign).</p>
+    <div class="code-panel">
+      <div class="code-header"><span class="code-lang">cURL</span></div>
+      <pre><span class="fn">curl</span> -X POST https://api.linktrace.in/api/v1/referral-links \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{ "referrerIdentifier": "user_42", "source": "whatsapp", "campaign": "summer_2026" }'</span>
+
+<span class="c"># Response</span>
+{
+  <span class="k">"shortCode"</span>: <span class="s">"8fa3c12e"</span>,
+  <span class="k">"referralLink"</span>: <span class="s">"https://app.linktrace.in/r/8fa3c12e"</span>,
+  ...
+}</pre>
+    </div>
+  </div>
+
+  <div class="concept-box">
+    <h2>Step 2 — Share the link with the referrer</h2>
+    <p>
+      Return the <span class="inline-code">referralLink</span> URL to your user. They share it through
+      WhatsApp, Instagram, or any other channel. LinkTrace automatically records clicks.
+    </p>
+  </div>
+
+  <div class="concept-box">
+    <h2>Step 3 — Attribute the install (on first app launch)</h2>
+    <p>
+      On first launch after install, call the attribution endpoint from your backend
+      (or directly from the app) with the new user's ID.
+    </p>
+    <div class="code-panel">
+      <div class="code-header"><span class="code-lang">cURL</span></div>
+      <pre><span class="fn">curl</span> -X POST https://api.linktrace.in/api/v1/attributions \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{ "userId": "new_user_999", "ipAddress": "203.0.113.42" }'</span>
+
+<span class="c"># If a click match was found</span>
+{
+  <span class="k">"attributed"</span>: <span class="kw">true</span>,
+  <span class="k">"referrerIdentifier"</span>: <span class="s">"user_42"</span>,
+  <span class="k">"sourceLinkShortCode"</span>: <span class="s">"8fa3c12e"</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="concept-box">
+    <h2>Step 4 — Track downstream events (Scale plan)</h2>
+    <p>
+      After install, send custom events whenever the user performs a meaningful action.
+      Use <span class="inline-code">entityId</span> on transactional events like purchases to prevent double-counting.
+    </p>
+    <div class="code-panel">
+      <div class="code-header"><span class="code-lang">cURL</span></div>
+      <pre><span class="fn">curl</span> -X POST https://api.linktrace.in/api/v1/events \
+  -H <span class="s">"x-api-key: lt_live_xxxxxxxxxxxxxxxxxxxx"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "linkShortCode": "8fa3c12e",
+    "eventName": "first_purchase",
+    "entityId": "order_00112"
+  }'</span></pre>
+    </div>
+    <p style="margin-top: 16px;">
+      Query the funnel at any time to see click → install → event conversion for that link
+      using <span class="inline-code">GET /api/v1/analytics/links/8fa3c12e/funnel</span>.
+    </p>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="footer">
+    <p>
+      LinkTrace API Reference &mdash; for integration support contact
+      <a href="mailto:support@linktrace.in">support@linktrace.in</a>
+    </p>
+    <p style="margin-top: 8px; font-size: 12px;">Base URL: <span class="inline-code">https://api.linktrace.in</span></p>
+  </div>
+
+</div>
+</body>
+</html>
