@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkTrace — Enable Deep Linking</title>
+  <style>
+    :root {
+      /* Core LinkTrace palette */
+      --bg: #1a1d29;
+      --surface: #242938;
+      --surface2: #2d3748;
+      --border: #374151;
+      --accent: #4ade80;
+      --accent-fg: #1a1d29;
+      --text: #e2e8f0;
+      --text-dim: #9ca3af;
+      --text-muted: #6b7280;
+      --code-bg: #111827;
+
+      /* Chart palette — used for syntax + accents */
+      --cyan: #22d3ee;
+      --purple: #a78bfa;
+      --rose: #fb7185;
+      --amber: #fbbf24;
+      --red: #f87171;
+
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 8px;
+
+      --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Fira Code', monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 40px 20px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page { max-width: 940px; margin: 0 auto; }
+
+    a { color: var(--accent); }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 40px 0 48px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .logo-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .subtitle { font-size: 16px; color: var(--text-dim); max-width: 640px; margin: 0 auto; }
+
+    /* ── Plan banner ── */
+    .plan-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(74, 222, 128, 0.06);
+      border: 1px solid rgba(74, 222, 128, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      margin-bottom: 40px;
+    }
+    .plan-banner .plan-icon { font-size: 20px; line-height: 1.2; flex-shrink: 0; }
+    .plan-banner .plan-title { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+    .plan-banner .plan-body { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+    .plan-banner .plan-body strong { color: var(--text); font-weight: 600; }
+
+    /* ── Concept box ── */
+    .concept-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+    }
+
+    .concept-box h2 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .concept-box p { font-size: 14px; color: var(--text-dim); line-height: 1.75; margin-bottom: 12px; }
+    .concept-box p:last-of-type { margin-bottom: 0; }
+    .concept-box strong { color: var(--text); font-weight: 600; }
+
+    .highlight-inline {
+      display: inline;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* ── Section titles ── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .section-spacer { margin-bottom: 60px; }
+
+    /* ── Flow ── */
+    .flow { display: flex; flex-direction: column; gap: 0; }
+    .step-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+    .step {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 30px;
+    }
+
+    .step-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+
+    .step-number {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      background: rgba(74, 222, 128, 0.12);
+      border: 1px solid rgba(74, 222, 128, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+
+    .step-title-group { flex: 1; }
+    .step-title { font-size: 16px; font-weight: 600; color: #fff; line-height: 1.3; }
+    .step-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+    .step-tag {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .tag-you { color: var(--amber); background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.35); }
+    .tag-app { color: var(--accent); background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.35); }
+
+    /* ── Arrow connector ── */
+    .arrow-connector { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
+    .arrow-line { width: 2px; height: 20px; background: linear-gradient(to bottom, var(--border), var(--accent)); }
+    .arrow-head { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--accent); }
+
+    .auto-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+    .auto-text strong { color: var(--text); font-weight: 500; }
+
+    /* ── Steps inside cards ── */
+    .auto-steps { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+    .auto-step { display: flex; align-items: flex-start; gap: 12px; }
+    .auto-num {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      font-family: var(--mono); margin-top: 1px;
+    }
+
+    /* ── Code blocks ── */
+    .code-panel {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 16px; background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .code-lang {
+      font-family: var(--mono);
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    pre {
+      padding: 18px 20px; font-family: var(--mono); font-size: 12.5px;
+      line-height: 1.75; overflow-x: auto; color: #cbd5e1;
+    }
+
+    /* syntax — mapped to brand chart palette */
+    .c  { color: var(--text-muted); }          /* comment   */
+    .s  { color: #86efac; }                     /* string    */
+    .k  { color: var(--purple); }               /* keyword   */
+    .kw { color: var(--cyan); }                 /* prop/attr */
+    .t  { color: var(--cyan); }                 /* type      */
+    .n  { color: var(--amber); }                /* number    */
+    .fn { color: var(--amber); }                /* function  */
+    .at { color: var(--rose); }                 /* xml tag   */
+    .u  { color: #86efac; }                     /* url       */
+
+    /* ── Tables ── */
+    .payload-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+    .payload-table th {
+      background: var(--surface2); color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 10px 16px; text-align: left; border: 1px solid var(--border);
+    }
+    .payload-table td { padding: 12px 16px; border: 1px solid var(--border); vertical-align: top; color: var(--text-dim); }
+    .payload-table tr:nth-child(even) td { background: rgba(45, 55, 72, 0.35); }
+    .payload-table td:first-child { font-family: var(--mono); color: var(--accent); font-size: 12px; white-space: nowrap; }
+
+    /* ── Implementation card ── */
+    .impl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 30px;
+      margin-bottom: 16px;
+    }
+    .impl-card h3 { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .impl-card .impl-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.6; }
+
+    /* ── Platform tabs ── */
+    .platform-section { margin-bottom: 60px; }
+    .platform-tabs {
+      display: flex; gap: 6px; margin-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .platform-tab {
+      padding: 9px 18px; font-size: 13px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s ease, border-color 0.15s ease; user-select: none;
+    }
+    .platform-tab:hover { color: var(--text-dim); }
+    .platform-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .platform-content { display: none; }
+    .platform-content.active { display: block; }
+
+    /* Print-only platform label (hidden on screen) */
+    .platform-print-label { display: none; }
+
+    /* ── Screenshot figure ── */
+    .figure {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #fff;
+    }
+    .figure img { display: block; width: 100%; height: auto; }
+    .figure figcaption {
+      font-size: 12px; color: var(--text-muted);
+      padding: 10px 16px; background: var(--surface2);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Note boxes ── */
+    .note-box, .note-info, .note-tip, .note-warn { padding: 14px 18px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.6; margin-top: 16px; }
+    .note-title { font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+
+    .note-info { background: rgba(34, 211, 238, 0.07); border: 1px solid rgba(34, 211, 238, 0.3); }
+    .note-info .note-title { color: var(--cyan); }
+    .note-info .note-body { color: #93cbe0; }
+    .note-info .note-body strong { color: #a5f3fc; }
+
+    .note-tip { background: rgba(74, 222, 128, 0.06); border: 1px solid rgba(74, 222, 128, 0.3); }
+    .note-tip .note-title { color: var(--accent); }
+    .note-tip .note-body { color: #86efac; }
+    .note-tip .note-body strong { color: #bbf7d0; }
+
+    .note-warn { background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.3); }
+    .note-warn .note-title { color: var(--amber); }
+    .note-warn .note-body { color: #dcb878; }
+    .note-warn .note-body strong { color: #fde68a; }
+
+    /* ── Where-to-find list ── */
+    .find-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 4px; }
+    .find-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px 18px;
+    }
+    .find-card .find-key {
+      font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 600;
+      margin-bottom: 6px; display: block;
+    }
+    .find-card .find-path { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+    .find-card .find-path strong { color: var(--text); font-weight: 600; }
+    .crumb {
+      font-family: var(--mono); font-size: 11px; color: var(--cyan);
+      background: var(--code-bg); border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 4px;
+    }
+
+    /* ── Rules ── */
+    .rules-section { margin-bottom: 48px; }
+    .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .rules-grid { grid-template-columns: 1fr; } }
+    .rule-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 18px; display: flex; gap: 12px; }
+    .rule-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+    .rule-text { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+    .rule-text strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 2px; }
+
+    code {
+      font-family: var(--mono); font-size: 12px; background: var(--code-bg);
+      border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; color: var(--accent);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center; padding-top: 36px; border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-muted);
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-badge">
+      <div class="logo-dot"></div>
+      LinkTrace Developer Docs
+    </div>
+    <h1>Enable Deep Linking</h1>
+    <p class="subtitle">Make your LinkTrace links open <em>directly</em> inside your app — instead of sending the user to the app store — whenever the app is already installed.</p>
+  </header>
+
+  <!-- Plan requirement -->
+  <div class="plan-banner">
+    <div class="plan-icon">🚀</div>
+    <div>
+      <div class="plan-title">Requires the Scale plan</div>
+      <div class="plan-body">Deep linking is enabled on a <strong>custom branded subdomain</strong> (e.g. <strong>&lt;your-brand&gt;.linktrace.in</strong>), which is available on the <strong>Scale plan</strong>. You'll need an active branded subdomain before deep linking can be turned on for your app.</div>
+    </div>
+  </div>
+
+  <!-- Concept -->
+  <div class="concept-box section-spacer">
+    <h2>What this enables</h2>
+    <p>
+      Every LinkTrace link is a normal HTTPS URL, e.g. <span class="highlight-inline">https://&lt;your-brand&gt;.linktrace.in/r/56ff9241</span>.
+      By default, tapping it sends the user to the <strong>App Store or Play Store</strong> — the right place when the app
+      isn't installed yet.
+    </p>
+    <p>
+      With deep linking enabled, the operating system recognises that the URL belongs to <strong>your</strong> app.
+      So when the app is <strong>already installed</strong>, tapping the link opens your app directly instead of the store —
+      no store detour, no extra tap.
+    </p>
+    <p>
+      LinkTrace already hosts and serves the domain-side verification for you. <strong>You only need to do two things:</strong>
+      send us a few identifiers so we can publish the association for your app, and make a small change in your app so it claims your
+      branded subdomain.
+    </p>
+    <div class="note-info">
+      <div class="note-title">Your link domain</div>
+      <div class="note-body">Throughout this guide, replace <strong>&lt;your-brand&gt;.linktrace.in</strong> with your own branded subdomain. You'll find your active domain in your LinkTrace dashboard under <strong>Settings</strong>.</div>
+    </div>
+  </div>
+
+  <!-- High-level flow -->
+  <div class="section-spacer">
+    <div class="section-label">How Setup Works — 2 Parts</div>
+    <div class="flow">
+
+      <div class="step-wrapper">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">01</div>
+            <div class="step-title-group">
+              <div class="step-title">Send LinkTrace your app identifiers</div>
+              <div class="step-subtitle">A couple of values from App Store Connect / Play Console</div>
+            </div>
+            <div class="step-tag tag-you">You → LinkTrace</div>
+          </div>
+          <div class="auto-text">You share your iOS and/or Android identifiers (below). We publish the trusted association on your branded subdomain — there is nothing for you to host.</div>
+        </div>
+        <div class="arrow-connector"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+      </div>
+
+      <div class="step-wrapper">
+        <div class="step">
+          <div class="step-header">
+            <div class="step-number">02</div>
+            <div class="step-title-group">
+              <div class="step-title">Claim the subdomain in your app</div>
+              <div class="step-subtitle">An Associated Domains entry (iOS) / an auto-verified intent filter (Android)</div>
+            </div>
+            <div class="step-tag tag-app">In Your App</div>
+          </div>
+          <div class="auto-text">A one-line capability on iOS and a few lines of manifest on Android tell the OS your app owns the <code>/r/</code> links on your branded subdomain.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ───────────────── PART 1: What to send us ───────────────── -->
+  <div class="section-spacer">
+    <div class="section-label">Part 1 — Identifiers to Send LinkTrace</div>
+
+    <div class="platform-tabs">
+      <div class="platform-tab active" onclick="switchPlatform('share-ios')">iOS</div>
+      <div class="platform-tab" onclick="switchPlatform('share-android')">Android</div>
+    </div>
+
+    <!-- iOS share -->
+    <div id="platform-share-ios" class="platform-content active">
+      <h2 class="platform-print-label">iOS</h2>
+      <div class="impl-card">
+        <h3>Send us these two values</h3>
+        <p class="impl-desc">Both uniquely identify your iOS app and both live in the same place — App Store Connect → <strong>App Information</strong>.</p>
+        <table class="payload-table">
+          <thead><tr><th>Value</th><th>What it looks like</th><th>What it is</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Apple ID</td>
+              <td>1358258808</td>
+              <td>The numeric App Store identifier for your app</td>
+            </tr>
+            <tr>
+              <td>Bundle ID</td>
+              <td>com.yourbrand.app</td>
+              <td>The unique identifier of the app build you ship</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note-tip">
+          <div class="note-title">Where to find them</div>
+          <div class="note-body">In <strong>App Store Connect</strong> → <span class="crumb">Apps</span> → your app → <span class="crumb">App Information</span>. Both the <strong>Bundle ID</strong> and the <strong>Apple ID</strong> are listed under <strong>General Information</strong>, as shown below.</div>
+        </div>
+
+        <figure class="figure">
+          <img src="appstore-app-information.png" alt="App Store Connect — General Information showing Bundle ID and Apple ID" />
+          <figcaption>App Store Connect → App Information → General Information — copy the <strong>Bundle ID</strong> and <strong>Apple ID</strong> values.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- Android share -->
+    <div id="platform-share-android" class="platform-content">
+      <h2 class="platform-print-label">Android</h2>
+      <div class="impl-card">
+        <h3>Send us these two values</h3>
+        <p class="impl-desc">These uniquely identify your Android app and prove the build is genuinely yours.</p>
+        <table class="payload-table">
+          <thead><tr><th>Value</th><th>What it looks like</th><th>What it is</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Package name</td>
+              <td>com.yourbrand.app</td>
+              <td>Your app's <code>applicationId</code> — its unique ID on the Play Store</td>
+            </tr>
+            <tr>
+              <td>SHA-256 fingerprint</td>
+              <td>AB:CD:EF:…:99</td>
+              <td>The signing certificate fingerprint of your released app</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note-tip">
+          <div class="note-title">Where to find them</div>
+          <div class="note-body">The package name is in your project; the SHA-256 fingerprint comes from Play Console (recommended) or your release keystore.</div>
+        </div>
+
+        <div class="find-grid">
+          <div class="find-card">
+            <span class="find-key">Package name</span>
+            <div class="find-path">
+              In your app module's <code>build.gradle</code> → <strong>android { defaultConfig { applicationId } }</strong>.
+              <br><span style="color:var(--text-muted)">Or in <strong>Play Console</strong> → select your app — the package name is shown under the app title on the dashboard.</span>
+            </div>
+          </div>
+          <div class="find-card">
+            <span class="find-key">SHA-256 — from Play App Signing (recommended)</span>
+            <div class="find-path">
+              In <strong>Play Console</strong> → your app →
+              <span class="crumb">Test and release</span> →
+              <span class="crumb">Setup</span> →
+              <span class="crumb">App signing</span>.
+              Copy the <strong>SHA-256 certificate fingerprint</strong> shown under
+              <strong>App signing key certificate</strong>.
+              <br><span style="color:var(--text-muted)">This is the certificate Google re-signs your app with, so it's the one that matters for installs from the Play Store.</span>
+            </div>
+          </div>
+          <div class="find-card">
+            <span class="find-key">SHA-256 — from your release keystore</span>
+            <div class="find-path">
+              If you sign the released app yourself, run <code>keytool</code> against your release keystore:
+              <div class="code-panel" style="margin-top:10px;">
+                <div class="code-header"><span class="code-lang">Terminal</span></div>
+<pre>keytool -list -v -keystore <span class="s">my-release.keystore</span> -alias <span class="s">my-alias</span></pre>
+              </div>
+              <span style="color:var(--text-muted)">Copy the line labelled <strong>SHA256:</strong> from the output.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-warn">
+          <div class="note-title">⚠ Send the App signing key fingerprint</div>
+          <div class="note-body">If you use <strong>Play App Signing</strong> (the default for new apps), the fingerprint that verifies installed apps is the <strong>App signing key</strong> one from Play Console — <strong>not</strong> your upload key. Send that one.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────── PART 2: Claim the subdomain ───────────────── -->
+  <div class="platform-section">
+    <div class="section-label">Part 2 — Claim the Subdomain in Your App</div>
+
+    <div class="platform-tabs">
+      <div class="platform-tab active" onclick="switchPlatform('claim-ios')">iOS</div>
+      <div class="platform-tab" onclick="switchPlatform('claim-android')">Android</div>
+    </div>
+
+    <!-- iOS claim -->
+    <div id="platform-claim-ios" class="platform-content active">
+      <h2 class="platform-print-label">iOS</h2>
+      <div class="impl-card">
+        <h3>Add the Associated Domains capability</h3>
+        <p class="impl-desc">In Xcode, open your target → <code>Signing &amp; Capabilities</code> → <strong>+ Capability</strong> → <strong>Associated Domains</strong>. Add one entry for your branded subdomain, prefixed with <code>applinks:</code>.</p>
+        <div class="code-panel">
+          <div class="code-header"><span class="code-lang">Associated Domains entry</span></div>
+<pre>applinks:&lt;your-brand&gt;.linktrace.in</pre>
+        </div>
+        <p class="impl-desc" style="margin-top:16px;">Xcode writes this into your <code>.entitlements</code> file:</p>
+        <div class="code-panel">
+          <div class="code-header"><span class="code-lang">YourApp.entitlements</span></div>
+<pre><span class="at">&lt;key&gt;</span>com.apple.developer.associated-domains<span class="at">&lt;/key&gt;</span>
+<span class="at">&lt;array&gt;</span>
+  <span class="at">&lt;string&gt;</span><span class="s">applinks:&lt;your-brand&gt;.linktrace.in</span><span class="at">&lt;/string&gt;</span>
+<span class="at">&lt;/array&gt;</span></pre>
+        </div>
+        <div class="note-info">
+          <div class="note-title">Path is scoped to /r/ automatically</div>
+          <div class="note-body">You only declare the subdomain here. LinkTrace publishes the association so that <strong>only your <code>/r/</code> links</strong> open the app — any other path on the subdomain stays in the browser. There's nothing extra to configure on the iOS side.</div>
+        </div>
+        <div class="note-tip">
+          <div class="note-title">Tip</div>
+          <div class="note-body">Enable the capability for your <strong>Release</strong> and <strong>TestFlight</strong> builds. It must also be enabled on the App ID in your Apple Developer account — Xcode usually does this automatically when you add the capability.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Android claim -->
+    <div id="platform-claim-android" class="platform-content">
+      <h2 class="platform-print-label">Android</h2>
+      <div class="impl-card">
+        <h3>Add an auto-verified intent filter (scoped to /r/)</h3>
+        <p class="impl-desc">In <code>AndroidManifest.xml</code>, add an intent filter with <code>android:autoVerify="true"</code> to the Activity that should receive deep links (often your launcher or a dedicated entry Activity). The <code>android:pathPrefix="/r/"</code> restricts it to LinkTrace links so the rest of your subdomain is untouched.</p>
+        <div class="code-panel">
+          <div class="code-header"><span class="code-lang">AndroidManifest.xml</span></div>
+<pre><span class="at">&lt;activity</span>
+    <span class="kw">android:name</span>=<span class="s">".MainActivity"</span>
+    <span class="kw">android:exported</span>=<span class="s">"true"</span><span class="at">&gt;</span>
+
+    <span class="c">&lt;!-- existing LAUNCHER intent filter stays as-is --&gt;</span>
+
+    <span class="at">&lt;intent-filter</span> <span class="kw">android:autoVerify</span>=<span class="s">"true"</span><span class="at">&gt;</span>
+        <span class="at">&lt;action</span> <span class="kw">android:name</span>=<span class="s">"android.intent.action.VIEW"</span> <span class="at">/&gt;</span>
+        <span class="at">&lt;category</span> <span class="kw">android:name</span>=<span class="s">"android.intent.category.DEFAULT"</span> <span class="at">/&gt;</span>
+        <span class="at">&lt;category</span> <span class="kw">android:name</span>=<span class="s">"android.intent.category.BROWSABLE"</span> <span class="at">/&gt;</span>
+
+        <span class="at">&lt;data</span>
+            <span class="kw">android:scheme</span>=<span class="s">"https"</span>
+            <span class="kw">android:host</span>=<span class="s">"&lt;your-brand&gt;.linktrace.in"</span>
+            <span class="kw">android:pathPrefix</span>=<span class="s">"/r/"</span> <span class="at">/&gt;</span>
+    <span class="at">&lt;/intent-filter&gt;</span>
+
+<span class="at">&lt;/activity&gt;</span></pre>
+        </div>
+        <div class="note-warn">
+          <div class="note-title">⚠ Keep the scheme as https</div>
+          <div class="note-body">Deep link verification works over <code>https</code> only. Keep <code>android:scheme</code> set to <strong>https</strong> and <code>android:host</code> exactly equal to your branded subdomain. The association we publish must match this host for Android to auto-verify your app.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verify / test -->
+  <div class="section-spacer">
+    <div class="section-label">Verify It Works</div>
+    <div class="impl-card">
+      <h3>Quick checks before you ship</h3>
+      <div class="code-panel">
+        <div class="code-header"><span class="code-lang">Android — confirm verification on a connected device</span></div>
+<pre><span class="c"># Inspect deep-link verification state for your package</span>
+adb shell pm get-app-links <span class="s">com.yourbrand.app</span>
+
+<span class="c"># Simulate opening a link as if tapped</span>
+adb shell am start -a android.intent.action.VIEW \
+  -d <span class="s">"https://&lt;your-brand&gt;.linktrace.in/r/56ff9241"</span> <span class="s">com.yourbrand.app</span></pre>
+      </div>
+      <div class="auto-steps" style="margin-top:20px;">
+        <div class="auto-step"><div class="auto-num">1</div><div class="auto-text"><strong>iOS:</strong> after we confirm your association is live, install the app and <strong>tap</strong> a real <code>/r/</code> link from Notes or Messages — it should open your app. (Pasting the URL into Safari's address bar will <em>not</em> trigger it — you must tap it.)</div></div>
+        <div class="auto-step"><div class="auto-num">2</div><div class="auto-text"><strong>Android:</strong> <code>pm get-app-links</code> should show your domain as <strong>verified</strong>. Tapping a <code>/r/</code> link then opens the app directly with no chooser.</div></div>
+        <div class="auto-step"><div class="auto-num">3</div><div class="auto-text">Verification happens <strong>at install time</strong>. After we publish a change or you update the manifest/entitlement, <strong>reinstall</strong> the app to re-trigger verification.</div></div>
+      </div>
+      <div class="note-info">
+        <div class="note-title">What happens on open</div>
+        <div class="note-body">For now, a verified link simply <strong>opens your app to its home screen</strong>. (To route users to a specific in-app screen — and to handle users who install <em>after</em> tapping the link — pair this with LinkTrace's <strong>Attribution API</strong>. See the <em>Deferred Deep Linking</em> guide.)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Best practices -->
+  <div class="rules-section">
+    <div class="section-label">Notes &amp; Best Practices</div>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-icon">📨</div>
+        <div class="rule-text">
+          <strong>Send identifiers before you test</strong>
+          The association only goes live once we publish it from your identifiers. Deep links won't open the app until that's in place — so share the values first.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🔁</div>
+        <div class="rule-text">
+          <strong>Reinstall to re-verify</strong>
+          Both platforms verify the association on install. After any manifest/entitlement change — or after we update your association — uninstall and reinstall to re-run verification.
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🔗</div>
+        <div class="rule-text">
+          <strong>Match the host exactly</strong>
+          The subdomain in your entitlement / intent filter must match your live branded subdomain character-for-character (no <code>www.</code>, scheme must be <code>https</code>).
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🤝</div>
+        <div class="rule-text">
+          <strong>Add deferred deep linking for new installs</strong>
+          Deep links only fire when the app is installed. Pair them with the Attribution API to route users who install <em>after</em> tapping the link.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>LinkTrace &mdash; Mobile Attribution &amp; Deep Linking &nbsp;·&nbsp; <a href="https://linktrace.in">linktrace.in</a></p>
+    <p style="margin-top:6px;font-size:12px;">Questions or your identifiers ready? Reach us at <a href="mailto:support@linktrace.in">support@linktrace.in</a></p>
+  </footer>
+
+</div>
+
+<script>
+  function switchPlatform(id) {
+    var clicked = document.querySelector('.platform-tab[onclick="switchPlatform(\'' + id + '\')"]');
+    var tabBar = clicked.closest('.platform-tabs');
+    var group = clicked.closest('.platform-section, .section-spacer');
+    tabBar.querySelectorAll('.platform-tab').forEach(function (t) { t.classList.remove('active'); });
+    group.querySelectorAll('.platform-content').forEach(function (c) { c.classList.remove('active'); });
+    clicked.classList.add('active');
+    document.getElementById('platform-' + id).classList.add('active');
+  }
+</script>
+</body>
+</html>
